@@ -63,6 +63,14 @@ const SupabaseModule = {
         if (data.session) {
             this.currentUser = data.session.user;
             await this.pullData();
+            
+            // Bulletproof fallback: Restore username from native Auth Metadata if it exists
+            if (this.currentUser.user_metadata && this.currentUser.user_metadata.username) {
+                if (typeof ProfileModule !== 'undefined') {
+                    ProfileModule.save(this.currentUser.user_metadata.username);
+                }
+            }
+            
             return true;
         }
         return false;
@@ -73,8 +81,16 @@ const SupabaseModule = {
         this.currentUser = data.user;
         await this.pullData();
     },
-    async register(email, password) {
-        const { data, error } = await supabaseClient.auth.signUp({ email, password });
+    async register(email, password, username) {
+        const { data, error } = await supabaseClient.auth.signUp({ 
+            email, 
+            password,
+            options: {
+                data: {
+                    username: username || 'ATHLETE'
+                }
+            }
+        });
         if (error) throw error;
         this.currentUser = data.user;
         await this.pushData();
@@ -2759,7 +2775,7 @@ if (document.getElementById('show-login-btn')) {
                 if (usernameInput) {
                     ProfileModule.save(usernameInput);
                 }
-                await SupabaseModule.register(email, password);
+                await SupabaseModule.register(email, password, usernameInput);
             }
             authOverlay.style.display = 'none';
             window.location.reload(); 
