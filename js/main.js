@@ -1324,10 +1324,21 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    document.getElementById('profile-form').addEventListener('submit', (e) => {
+    document.getElementById('profile-form').addEventListener('submit', async (e) => {
         e.preventDefault();
         const username = document.getElementById('profile-username').value;
+        const newPassword = document.getElementById('profile-new-password').value;
+        
         ProfileModule.save(username);
+        
+        if (newPassword && SupabaseModule.currentUser) {
+            const { error } = await supabaseClient.auth.updateUser({ password: newPassword });
+            if (error) {
+                alert('Error updating password: ' + error.message);
+                return;
+            }
+            document.getElementById('profile-new-password').value = '';
+        }
         
         const saveBtn = e.target.querySelector('button[type="submit"]');
         const origText = saveBtn.textContent;
@@ -1338,6 +1349,15 @@ document.addEventListener('DOMContentLoaded', () => {
             saveBtn.style.background = 'var(--neon-primary)';
         }, 1500);
     });
+
+    const signOutBtn = document.getElementById('sign-out-btn');
+    if (signOutBtn) {
+        signOutBtn.addEventListener('click', () => {
+            if (confirm("Are you sure you want to sign out?")) {
+                SupabaseModule.logout();
+            }
+        });
+    }
 
     let statisticsPopulated = false;
 
@@ -2711,4 +2731,28 @@ if (document.getElementById('show-login-btn')) {
             authErrorMsg.style.display = 'block';
         }
     });
+
+    const forgotBtn = document.getElementById('forgot-password-btn');
+    if (forgotBtn) {
+        forgotBtn.addEventListener('click', async () => {
+            const email = document.getElementById('auth-email').value;
+            if (!email) {
+                authErrorMsg.textContent = 'Please enter your email address above first.';
+                authErrorMsg.style.display = 'block';
+                return;
+            }
+            authErrorMsg.style.display = 'none';
+            forgotBtn.textContent = 'Sending...';
+            const { error } = await supabaseClient.auth.resetPasswordForEmail(email);
+            if (error) {
+                authErrorMsg.textContent = error.message;
+                authErrorMsg.style.display = 'block';
+            } else {
+                authErrorMsg.textContent = 'Password reset email sent! Check your inbox.';
+                authErrorMsg.style.color = 'var(--neon-primary)';
+                authErrorMsg.style.display = 'block';
+            }
+            forgotBtn.textContent = 'Forgot Password?';
+        });
+    }
 }
