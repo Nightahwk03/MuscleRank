@@ -724,7 +724,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderProfile() {
         const profile = ProfileModule.getProfile();
-        document.getElementById('profile-username').value = profile.username;
+        const displayEl = document.getElementById('profile-username-display');
+        if (displayEl) displayEl.textContent = profile.username || 'ATHLETE';
         
         if (SupabaseModule.currentUser) {
             const emailEl = document.getElementById('profile-email-display');
@@ -1341,20 +1342,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    document.getElementById('profile-form').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const username = document.getElementById('profile-username').value;
-        ProfileModule.save(username);
-        
-        const saveBtn = e.target.querySelector('button[type="submit"]');
-        const origText = saveBtn.textContent;
-        saveBtn.textContent = 'Saved!';
-        saveBtn.style.background = 'var(--neon-secondary)';
-        setTimeout(() => {
-            saveBtn.textContent = origText;
-            saveBtn.style.background = 'var(--neon-primary)';
-        }, 1500);
-    });
+
 
     const signOutBtn = document.getElementById('sign-out-btn');
     if (signOutBtn) {
@@ -2712,6 +2700,7 @@ if (document.getElementById('show-login-btn')) {
         document.getElementById('show-register-btn').style.borderBottom = '2px solid transparent';
         document.getElementById('show-register-btn').style.color = 'var(--text-secondary)';
         document.getElementById('auth-submit-btn').textContent = 'Sign In';
+        document.getElementById('auth-username').style.display = 'none';
         authErrorMsg.style.display = 'none';
     });
 
@@ -2722,6 +2711,7 @@ if (document.getElementById('show-login-btn')) {
         document.getElementById('show-login-btn').style.borderBottom = '2px solid transparent';
         document.getElementById('show-login-btn').style.color = 'var(--text-secondary)';
         document.getElementById('auth-submit-btn').textContent = 'Create Account';
+        document.getElementById('auth-username').style.display = 'block';
         authErrorMsg.style.display = 'none';
     });
 
@@ -2729,12 +2719,19 @@ if (document.getElementById('show-login-btn')) {
         e.preventDefault();
         const email = document.getElementById('auth-email').value;
         const password = document.getElementById('auth-password').value;
+        const usernameInput = document.getElementById('auth-username').value;
         authErrorMsg.style.display = 'none';
+        
+        const submitBtn = document.getElementById('auth-submit-btn');
+        submitBtn.textContent = 'Processing...';
         
         try {
             if (isLoginMode) {
                 await SupabaseModule.login(email, password);
             } else {
+                if (usernameInput) {
+                    ProfileModule.save(usernameInput);
+                }
                 await SupabaseModule.register(email, password);
             }
             authOverlay.style.display = 'none';
@@ -2742,6 +2739,7 @@ if (document.getElementById('show-login-btn')) {
         } catch (error) {
             authErrorMsg.textContent = error.message;
             authErrorMsg.style.display = 'block';
+            submitBtn.textContent = isLoginMode ? 'Sign In' : 'Create Account';
         }
     });
 
