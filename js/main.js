@@ -2765,3 +2765,42 @@ if (togglePasswordBtn && authPasswordInput) {
         }
     });
 }
+
+// Password Reset Flow Check
+if (window.location.hash.includes('type=recovery')) {
+    const resetOverlay = document.getElementById('reset-password-overlay');
+    if (resetOverlay) {
+        resetOverlay.style.display = 'flex';
+        document.getElementById('auth-overlay').style.display = 'none';
+        
+        document.getElementById('reset-password-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const resetErrorMsg = document.getElementById('reset-error-msg');
+            const newPassword = document.getElementById('reset-new-password').value;
+            const confirmPassword = document.getElementById('reset-confirm-password').value;
+            
+            resetErrorMsg.style.display = 'none';
+            
+            if (newPassword !== confirmPassword) {
+                resetErrorMsg.textContent = 'Passwords do not match!';
+                resetErrorMsg.style.display = 'block';
+                return;
+            }
+            
+            const btn = document.getElementById('reset-submit-btn');
+            btn.textContent = 'Updating...';
+            
+            const { error } = await supabaseClient.auth.updateUser({ password: newPassword });
+            
+            if (error) {
+                resetErrorMsg.textContent = error.message;
+                resetErrorMsg.style.display = 'block';
+                btn.textContent = 'Update Password';
+            } else {
+                alert('Password successfully updated! You can now log in.');
+                window.location.hash = '';
+                window.location.reload();
+            }
+        });
+    }
+}
