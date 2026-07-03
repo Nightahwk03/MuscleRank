@@ -118,7 +118,6 @@ const SupabaseModule = {
             data: payload
         });
         if (error) {
-            alert('Cloud Sync Error: ' + error.message);
             console.error('Push Data Error:', error);
         }
     },
