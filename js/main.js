@@ -63,14 +63,6 @@ const SupabaseModule = {
         if (data.session) {
             this.currentUser = data.session.user;
             await this.pullData();
-            
-            // Bulletproof fallback: Restore username from native Auth Metadata if it exists
-            if (this.currentUser.user_metadata && this.currentUser.user_metadata.username) {
-                if (typeof ProfileModule !== 'undefined') {
-                    ProfileModule.save(this.currentUser.user_metadata.username);
-                }
-            }
-            
             return true;
         }
         return false;
@@ -81,16 +73,8 @@ const SupabaseModule = {
         this.currentUser = data.user;
         await this.pullData();
     },
-    async register(email, password, username) {
-        const { data, error } = await supabaseClient.auth.signUp({ 
-            email, 
-            password,
-            options: {
-                data: {
-                    username: username || 'ATHLETE'
-                }
-            }
-        });
+    async register(email, password) {
+        const { data, error } = await supabaseClient.auth.signUp({ email, password });
         if (error) throw error;
         this.currentUser = data.user;
         await this.pushData();
@@ -120,8 +104,6 @@ const SupabaseModule = {
                     localStorage.setItem(key, payload[key]);
                 }
             }
-            // Refresh in-memory caches after pulling from cloud
-            if (typeof ProfileModule !== 'undefined') ProfileModule.init();
         }
     },
     async pushData() {
@@ -233,25 +215,7 @@ const SettingsModule = {
     getHistory() { return this.history; }
 };
 
-// --- profile.js ---
-const ProfileModule = {
-    profile: { username: '' },
-    init() {
-        this.profile = Storage.get('mr_profile', { username: '' });
-        this.updateSidebarUsername();
-    },
-    save(username) {
-        this.profile = { username };
-        Storage.set('mr_profile', this.profile);
-        this.updateSidebarUsername();
-        ChangeLogModule.log('edit', `Updated profile username to: ${username}`);
-    },
-    getProfile() { return this.profile; },
-    updateSidebarUsername() {
-        const el = document.getElementById('sidebar-username-display');
-        if (el) el.textContent = this.profile.username || 'ATHLETE';
-    }
-};
+
 
 // --- streak.js ---
 const StreakEngine = {
@@ -598,7 +562,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     ChangeLogModule.init();
     SettingsModule.init();
-    ProfileModule.init();
     PokemonModule.init();
     TeamModule.init();
     ExerciseModule.init();
@@ -742,10 +705,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderProfile() {
-        const profile = ProfileModule.getProfile();
-        const displayEl = document.getElementById('profile-username-display');
-        if (displayEl) displayEl.textContent = profile.username || 'ATHLETE';
-        
         if (SupabaseModule.currentUser) {
             const emailEl = document.getElementById('profile-email-display');
             if (emailEl) emailEl.textContent = SupabaseModule.currentUser.email;
@@ -2726,8 +2685,6 @@ document.addEventListener('DOMContentLoaded', () => {
 SupabaseModule.checkSession().then(isLoggedIn => {
     if (isLoggedIn) {
         document.getElementById('auth-overlay').style.display = 'none';
-        // Also refresh profile when session loads to show email
-        renderProfile();
     }
 });
 
@@ -2745,7 +2702,6 @@ if (document.getElementById('show-login-btn')) {
         document.getElementById('show-register-btn').style.borderBottom = '2px solid transparent';
         document.getElementById('show-register-btn').style.color = 'var(--text-secondary)';
         document.getElementById('auth-submit-btn').textContent = 'Sign In';
-        document.getElementById('auth-username').style.display = 'none';
         document.getElementById('forgot-password-btn').style.display = 'block';
         authErrorMsg.style.display = 'none';
     });
@@ -2757,7 +2713,6 @@ if (document.getElementById('show-login-btn')) {
         document.getElementById('show-login-btn').style.borderBottom = '2px solid transparent';
         document.getElementById('show-login-btn').style.color = 'var(--text-secondary)';
         document.getElementById('auth-submit-btn').textContent = 'Create Account';
-        document.getElementById('auth-username').style.display = 'block';
         document.getElementById('forgot-password-btn').style.display = 'none';
         authErrorMsg.style.display = 'none';
     });
@@ -2766,7 +2721,6 @@ if (document.getElementById('show-login-btn')) {
         e.preventDefault();
         const email = document.getElementById('auth-email').value;
         const password = document.getElementById('auth-password').value;
-        const usernameInput = document.getElementById('auth-username').value;
         authErrorMsg.style.display = 'none';
         
         const submitBtn = document.getElementById('auth-submit-btn');
@@ -2776,10 +2730,7 @@ if (document.getElementById('show-login-btn')) {
             if (isLoginMode) {
                 await SupabaseModule.login(email, password);
             } else {
-                if (usernameInput) {
-                    ProfileModule.save(usernameInput);
-                }
-                await SupabaseModule.register(email, password, usernameInput);
+                await SupabaseModule.register(email, password);
             }
             authOverlay.style.display = 'none';
             window.location.reload(); 
