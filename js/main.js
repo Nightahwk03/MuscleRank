@@ -2486,7 +2486,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         pulled.push(allCards[randomIndex]);
                     }
                     
-                    PullLogModule.savePull(pulled);
+                    PullLogModule.savePull(pulled, currentOpenedSet);
                     renderImages(pulled);
                 });
             }
@@ -2502,15 +2502,16 @@ document.addEventListener('DOMContentLoaded', () => {
         init() {
             this.logs = Storage.get('mr_pull_logs', []);
         },
-        savePull(cards) {
+        savePull(cards, packName = 'Unknown Pack') {
             const pullData = {
                 id: 'pull_' + Date.now(),
                 date: new Date().toISOString(),
-                cards: cards
+                cards: cards,
+                packName: packName
             };
             this.logs.unshift(pullData); // Add to beginning
             Storage.set('mr_pull_logs', this.logs);
-            ChangeLogModule.log('create', `Pulled ${cards.length} random cards.`);
+            ChangeLogModule.log('create', `Pulled ${cards.length} cards from ${packName}.`);
         },
         getAllLogs() {
             return this.logs;
@@ -2542,9 +2543,15 @@ document.addEventListener('DOMContentLoaded', () => {
             card.style.padding = '15px 20px';
             card.style.cursor = 'pointer';
             
+            const pName = log.packName || 'Random Pull';
+            const logoUrl = (typeof PACK_LOGOS !== 'undefined' && PACK_LOGOS[pName]) ? PACK_LOGOS[pName] : null;
+            const titleHtml = logoUrl 
+                ? `<div style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;"><img src="${logoUrl}" style="height: 24px; object-fit: contain;"> <h3 style="color: var(--neon-primary); margin: 0;">${pName}</h3></div>`
+                : `<h3 style="color: var(--neon-primary); margin: 0 0 5px 0;">${pName}</h3>`;
+
             card.innerHTML = `
                 <div>
-                    <h3 style="color: var(--neon-primary); margin: 0 0 5px 0;">Random Pull</h3>
+                    ${titleHtml}
                     <p style="margin: 0; color: var(--text-secondary); font-size: 0.9rem;">${dateStr} at ${timeStr}</p>
                 </div>
                 <div>
