@@ -199,16 +199,22 @@ const SettingsModule = {
 
 // --- profile.js ---
 const ProfileModule = {
-    profile: { username: '', loginId: '', password: '' },
+    profile: { username: '' },
     init() {
-        this.profile = Storage.get('mr_profile', { username: '', loginId: '', password: '' });
+        this.profile = Storage.get('mr_profile', { username: '' });
+        this.updateSidebarUsername();
     },
-    save(username, loginId, password) {
-        this.profile = { username, loginId, password };
+    save(username) {
+        this.profile = { username };
         Storage.set('mr_profile', this.profile);
-        ChangeLogModule.log('edit', `Updated profile for user: ${username}`);
+        this.updateSidebarUsername();
+        ChangeLogModule.log('edit', `Updated profile username to: ${username}`);
     },
-    getProfile() { return this.profile; }
+    getProfile() { return this.profile; },
+    updateSidebarUsername() {
+        const el = document.getElementById('sidebar-username-display');
+        if (el) el.textContent = this.profile.username || 'ATHLETE';
+    }
 };
 
 // --- streak.js ---
@@ -702,8 +708,11 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderProfile() {
         const profile = ProfileModule.getProfile();
         document.getElementById('profile-username').value = profile.username;
-        document.getElementById('profile-login-id').value = profile.loginId;
-        document.getElementById('profile-password').value = profile.password;
+        
+        if (SupabaseModule.currentUser) {
+            const emailEl = document.getElementById('profile-email-display');
+            if (emailEl) emailEl.textContent = SupabaseModule.currentUser.email;
+        }
     }
 
     let currentPokemonType = 'regular'; // 'regular' or 'shiny'
@@ -1318,10 +1327,16 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('profile-form').addEventListener('submit', (e) => {
         e.preventDefault();
         const username = document.getElementById('profile-username').value;
-        const login = document.getElementById('profile-login-id').value;
-        const pass = document.getElementById('profile-password').value;
-        ProfileModule.save(username, login, pass);
-        alert('Profile saved!');
+        ProfileModule.save(username);
+        
+        const saveBtn = e.target.querySelector('button[type="submit"]');
+        const origText = saveBtn.textContent;
+        saveBtn.textContent = 'Saved!';
+        saveBtn.style.background = 'var(--neon-secondary)';
+        setTimeout(() => {
+            saveBtn.textContent = origText;
+            saveBtn.style.background = 'var(--neon-primary)';
+        }, 1500);
     });
 
     let statisticsPopulated = false;
@@ -2641,11 +2656,12 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-
 // Initial Auth Check
 SupabaseModule.checkSession().then(isLoggedIn => {
     if (isLoggedIn) {
         document.getElementById('auth-overlay').style.display = 'none';
+        // Also refresh profile when session loads to show email
+        renderProfile();
     }
 });
 
