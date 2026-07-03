@@ -62,6 +62,7 @@ const SupabaseModule = {
         const { data } = await supabaseClient.auth.getSession();
         if (data.session) {
             this.currentUser = data.session.user;
+            await this.pullData();
             return true;
         }
         return false;
@@ -79,6 +80,10 @@ const SupabaseModule = {
         await this.pushData();
     },
     async logout() {
+        if (this.syncTimeout) {
+            clearTimeout(this.syncTimeout);
+            await this.pushData();
+        }
         await supabaseClient.auth.signOut();
         this.currentUser = null;
         localStorage.clear();
