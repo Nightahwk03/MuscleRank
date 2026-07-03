@@ -159,9 +159,13 @@
                             <label>Username</label>
                             <input type="text" id="profile-username" placeholder="Enter Username">
                         </div>
+                        <div class="form-group" style="margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px;">
+                            <label>Change Password (Optional)</label>
+                            <input type="password" id="profile-new-password" placeholder="Enter new password to change">
+                        </div>
                         <div style="display: flex; gap: 10px; margin-top: 10px;">
                             <button type="submit" class="action-btn primary-btn" style="flex: 1;">Save Profile</button>
-                            <button type="button" id="sign-out-btn" class="action-btn secondary-btn" style="flex: 1;" onclick="if(window.SupabaseModule) SupabaseModule.logout()">Sign Out</button>
+                            <button type="button" id="sign-out-btn" class="action-btn secondary-btn" style="flex: 1;">Sign Out</button>
                         </div>
                     </form>
                 </div>
@@ -675,6 +679,7 @@
                 <input type="password" id="auth-password" placeholder="Password" required style="width: 100%; padding: 0.8rem; background: rgba(0, 0, 0, 0.2); border: 1px solid #2A1642; color: #fff; border-radius: 8px;">
                 <p id="auth-error-msg" style="color: var(--neon-danger); font-size: 0.85rem; margin: 0; display: none;"></p>
                 <button type="submit" id="auth-submit-btn" class="action-btn primary-btn" style="padding: 0.8rem; font-size: 1rem; margin-top: 10px;">Sign In</button>
+                <button type="button" id="forgot-password-btn" style="background: none; border: none; color: var(--text-secondary); cursor: pointer; font-size: 0.85rem; text-decoration: underline; margin-top: -5px;">Forgot Password?</button>
             </form>
         </div>
     </div>
