@@ -685,6 +685,19 @@
         </div>
     </div>
 
+    <!-- Reset Password Overlay (Only visible when recovering password) -->
+    <div id="reset-password-overlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-main); z-index: 10001; display: none; align-items: center; justify-content: center; flex-direction: column;">
+        <h1 style="font-family: var(--font-heading); color: #fff; font-size: 2.5rem; margin-bottom: 2rem;">RESET PASSWORD</h1>
+        <div style="background: var(--bg-card); padding: 2rem; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); width: 90%; max-width: 400px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+            <form id="reset-password-form" style="display: flex; flex-direction: column; gap: 15px;">
+                <input type="password" id="reset-new-password" placeholder="New Password" required style="width: 100%; padding: 0.8rem; background: rgba(0, 0, 0, 0.2); border: 1px solid #2A1642; color: #fff; border-radius: 8px;">
+                <input type="password" id="reset-confirm-password" placeholder="Confirm Password" required style="width: 100%; padding: 0.8rem; background: rgba(0, 0, 0, 0.2); border: 1px solid #2A1642; color: #fff; border-radius: 8px;">
+                <p id="reset-error-msg" style="color: var(--neon-danger); font-size: 0.85rem; margin: 0; display: none;"></p>
+                <button type="submit" id="reset-submit-btn" class="action-btn primary-btn" style="padding: 0.8rem; font-size: 1rem; margin-top: 10px;">Update Password</button>
+            </form>
+        </div>
+    </div>
+
     <!-- Rank Up Modal overlay -->
     <div id="rank-up-modal" class="modal hidden">
         <div class="modal-content">
