@@ -114,7 +114,11 @@ const SupabaseModule = {
         if (data && data.data) {
             const payload = data.data;
             for (const key in payload) {
-                localStorage.setItem(key, payload[key]);
+                if (typeof payload[key] === 'object' && payload[key] !== null) {
+                    localStorage.setItem(key, JSON.stringify(payload[key]));
+                } else {
+                    localStorage.setItem(key, payload[key]);
+                }
             }
             // Refresh in-memory caches after pulling from cloud
             if (typeof ProfileModule !== 'undefined') ProfileModule.init();
