@@ -2747,3 +2747,18 @@ if (document.getElementById('show-login-btn')) {
         });
     }
 }
+
+// Password visibility toggle logic
+const togglePasswordBtn = document.getElementById('toggle-password-btn');
+const authPasswordInput = document.getElementById('auth-password');
+if (togglePasswordBtn && authPasswordInput) {
+    togglePasswordBtn.addEventListener('click', () => {
+        if (authPasswordInput.type === 'password') {
+            authPasswordInput.type = 'text';
+            togglePasswordBtn.textContent = '??';
+        } else {
+            authPasswordInput.type = 'password';
+            togglePasswordBtn.textContent = '???';
+        }
+    });
+}
