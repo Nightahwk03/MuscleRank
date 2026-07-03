@@ -2734,7 +2734,9 @@ if (document.getElementById('show-login-btn')) {
             }
             authErrorMsg.style.display = 'none';
             forgotBtn.textContent = 'Sending...';
-            const { error } = await supabaseClient.auth.resetPasswordForEmail(email);
+            const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+                redirectTo: 'https://nightahwk03.github.io/MuscleRank/'
+            });
             if (error) {
                 authErrorMsg.textContent = error.message;
                 authErrorMsg.style.display = 'block';
