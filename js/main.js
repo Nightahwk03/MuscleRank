@@ -92,6 +92,8 @@ const SupabaseModule = {
             for (const key in payload) {
                 localStorage.setItem(key, payload[key]);
             }
+            // Refresh in-memory caches after pulling from cloud
+            if (typeof ProfileModule !== 'undefined') ProfileModule.init();
         }
     },
     async pushData() {
@@ -1327,18 +1329,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('profile-form').addEventListener('submit', async (e) => {
         e.preventDefault();
         const username = document.getElementById('profile-username').value;
-        const newPassword = document.getElementById('profile-new-password').value;
-        
         ProfileModule.save(username);
-        
-        if (newPassword && SupabaseModule.currentUser) {
-            const { error } = await supabaseClient.auth.updateUser({ password: newPassword });
-            if (error) {
-                alert('Error updating password: ' + error.message);
-                return;
-            }
-            document.getElementById('profile-new-password').value = '';
-        }
         
         const saveBtn = e.target.querySelector('button[type="submit"]');
         const origText = saveBtn.textContent;
