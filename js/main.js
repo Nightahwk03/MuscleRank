@@ -53,13 +53,13 @@ MAJOR_RANKS.forEach(rank => {
 // --- storage.js ---
 const SUPABASE_URL = 'https://zqamwfxcfaeagdgwrfqw.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpxYW13ZnhjZmFlYWdkZ3dyZnF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMwOTUwMzQsImV4cCI6MjA5ODY3MTAzNH0.rZL2l5QzCa6cK6fKjaEXR_Ni19GTAyoOK52q8DXX91k';
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const SupabaseModule = {
     currentUser: null,
     syncTimeout: null,
     async checkSession() {
-        const { data } = await supabase.auth.getSession();
+        const { data } = await supabaseClient.auth.getSession();
         if (data.session) {
             this.currentUser = data.session.user;
             return true;
@@ -67,26 +67,26 @@ const SupabaseModule = {
         return false;
     },
     async login(email, password) {
-        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+        const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
         if (error) throw error;
         this.currentUser = data.user;
         await this.pullData();
     },
     async register(email, password) {
-        const { data, error } = await supabase.auth.signUp({ email, password });
+        const { data, error } = await supabaseClient.auth.signUp({ email, password });
         if (error) throw error;
         this.currentUser = data.user;
         await this.pushData();
     },
     async logout() {
-        await supabase.auth.signOut();
+        await supabaseClient.auth.signOut();
         this.currentUser = null;
         localStorage.clear();
         location.reload();
     },
     async pullData() {
         if (!this.currentUser) return;
-        const { data, error } = await supabase.from('user_data').select('data').eq('id', this.currentUser.id).single();
+        const { data, error } = await supabaseClient.from('user_data').select('data').eq('id', this.currentUser.id).single();
         if (data && data.data) {
             const payload = data.data;
             for (const key in payload) {
@@ -103,7 +103,7 @@ const SupabaseModule = {
                 payload[key] = localStorage.getItem(key);
             }
         }
-        await supabase.from('user_data').upsert({ id: this.currentUser.id, data: payload });
+        await supabaseClient.from('user_data').upsert({ id: this.currentUser.id, data: payload });
     },
     scheduleSync() {
         if (this.syncTimeout) clearTimeout(this.syncTimeout);
