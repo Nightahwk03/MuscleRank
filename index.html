@@ -672,7 +672,10 @@
             
             <form id="auth-form" style="display: flex; flex-direction: column; gap: 15px;">
                 <input type="email" id="auth-email" placeholder="Email Address" required style="width: 100%; padding: 0.8rem; background: rgba(0, 0, 0, 0.2); border: 1px solid #2A1642; color: #fff; border-radius: 8px;">
-                <input type="password" id="auth-password" placeholder="Password" required style="width: 100%; padding: 0.8rem; background: rgba(0, 0, 0, 0.2); border: 1px solid #2A1642; color: #fff; border-radius: 8px;">
+                <div style="position: relative; width: 100%;">
+                    <input type="password" id="auth-password" placeholder="Password" required style="width: 100%; padding: 0.8rem; padding-right: 2.5rem; background: rgba(0, 0, 0, 0.2); border: 1px solid #2A1642; color: #fff; border-radius: 8px; box-sizing: border-box;">
+                    <button type="button" id="toggle-password-btn" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-secondary); cursor: pointer; padding: 0; font-size: 1.1rem; display: flex; align-items: center; justify-content: center;">👁️</button>
+                </div>
                 <p id="auth-error-msg" style="color: var(--neon-danger); font-size: 0.85rem; margin: 0; display: none;"></p>
                 <button type="submit" id="auth-submit-btn" class="action-btn primary-btn" style="padding: 0.8rem; font-size: 1rem; margin-top: 10px;">Sign In</button>
                 <button type="button" id="forgot-password-btn" style="background: none; border: none; color: var(--text-secondary); cursor: pointer; font-size: 0.85rem; text-decoration: underline; margin-top: -5px;">Forgot Password?</button>
