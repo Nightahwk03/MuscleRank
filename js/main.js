@@ -115,8 +115,7 @@ const SupabaseModule = {
         }
         const { error } = await supabaseClient.from('user_data').upsert({
             id: this.currentUser.id,
-            data: payload,
-            updated_at: new Date().toISOString()
+            data: payload
         });
         if (error) {
             alert('Cloud Sync Error: ' + error.message);
