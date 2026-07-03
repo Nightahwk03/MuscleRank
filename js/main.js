@@ -2806,3 +2806,32 @@ if (window.location.hash.includes('type=recovery')) {
         });
     }
 }
+
+// Reset password toggles
+const toggleResetNewBtn = document.getElementById('toggle-reset-new-btn');
+const resetNewInput = document.getElementById('reset-new-password');
+if (toggleResetNewBtn && resetNewInput) {
+    toggleResetNewBtn.addEventListener('click', () => {
+        if (resetNewInput.type === 'password') {
+            resetNewInput.type = 'text';
+            toggleResetNewBtn.innerHTML = eyeSlashIconSvg;
+        } else {
+            resetNewInput.type = 'password';
+            toggleResetNewBtn.innerHTML = eyeIconSvg;
+        }
+    });
+}
+
+const toggleResetConfirmBtn = document.getElementById('toggle-reset-confirm-btn');
+const resetConfirmInput = document.getElementById('reset-confirm-password');
+if (toggleResetConfirmBtn && resetConfirmInput) {
+    toggleResetConfirmBtn.addEventListener('click', () => {
+        if (resetConfirmInput.type === 'password') {
+            resetConfirmInput.type = 'text';
+            toggleResetConfirmBtn.innerHTML = eyeSlashIconSvg;
+        } else {
+            resetConfirmInput.type = 'password';
+            toggleResetConfirmBtn.innerHTML = eyeIconSvg;
+        }
+    });
+}
