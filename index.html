@@ -154,16 +154,13 @@
                     <div style="margin-bottom: 20px; color: var(--text-secondary); font-size: 0.95rem; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px;">
                         Logged in as: <strong id="profile-email-display" style="color: var(--neon-primary);"></strong>
                     </div>
-                    <form id="profile-form" class="exercise-form" style="margin-top: 20px;">
-                        <div class="form-group">
-                            <label>Username</label>
-                            <input type="text" id="profile-username" placeholder="Enter Username">
-                        </div>
-                        <div style="display: flex; gap: 10px; margin-top: 10px;">
-                            <button type="submit" class="action-btn primary-btn" style="flex: 1;">Save Profile</button>
-                            <button type="button" id="sign-out-btn" class="action-btn secondary-btn" style="flex: 1;">Sign Out</button>
-                        </div>
-                    </form>
+                    <div style="margin-top: 20px; margin-bottom: 20px;">
+                        <p style="color: var(--text-secondary); margin-bottom: 5px;">Username</p>
+                        <h2 id="profile-username-display" style="color: #fff; margin: 0;"></h2>
+                    </div>
+                    <div style="display: flex; gap: 10px; margin-top: 10px;">
+                        <button type="button" id="sign-out-btn" class="action-btn secondary-btn" style="width: 100%;">Sign Out</button>
+                    </div>
                 </div>
             </section>
                         <!-- Pack Pull Module -->
@@ -671,6 +668,7 @@
             </div>
             
             <form id="auth-form" style="display: flex; flex-direction: column; gap: 15px;">
+                <input type="text" id="auth-username" placeholder="Username" style="display: none; width: 100%; padding: 0.8rem; background: rgba(0, 0, 0, 0.2); border: 1px solid #2A1642; color: #fff; border-radius: 8px;">
                 <input type="email" id="auth-email" placeholder="Email Address" required style="width: 100%; padding: 0.8rem; background: rgba(0, 0, 0, 0.2); border: 1px solid #2A1642; color: #fff; border-radius: 8px;">
                 <div style="position: relative; width: 100%;">
                     <input type="password" id="auth-password" placeholder="Password" required style="width: 100%; padding: 0.8rem; padding-right: 2.5rem; background: rgba(0, 0, 0, 0.2); border: 1px solid #2A1642; color: #fff; border-radius: 8px; box-sizing: border-box;">
