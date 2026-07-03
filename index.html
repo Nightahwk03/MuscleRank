@@ -674,7 +674,9 @@
                 <input type="email" id="auth-email" placeholder="Email Address" required style="width: 100%; padding: 0.8rem; background: rgba(0, 0, 0, 0.2); border: 1px solid #2A1642; color: #fff; border-radius: 8px;">
                 <div style="position: relative; width: 100%;">
                     <input type="password" id="auth-password" placeholder="Password" required style="width: 100%; padding: 0.8rem; padding-right: 2.5rem; background: rgba(0, 0, 0, 0.2); border: 1px solid #2A1642; color: #fff; border-radius: 8px; box-sizing: border-box;">
-                    <button type="button" id="toggle-password-btn" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-secondary); cursor: pointer; padding: 0; font-size: 1.1rem; display: flex; align-items: center; justify-content: center;">👁️</button>
+                    <button type="button" id="toggle-password-btn" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-secondary); cursor: pointer; padding: 0; display: flex; align-items: center; justify-content: center;">
+                        <svg id="eye-icon-show" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                    </button>
                 </div>
                 <p id="auth-error-msg" style="color: var(--neon-danger); font-size: 0.85rem; margin: 0; display: none;"></p>
                 <button type="submit" id="auth-submit-btn" class="action-btn primary-btn" style="padding: 0.8rem; font-size: 1rem; margin-top: 10px;">Sign In</button>
