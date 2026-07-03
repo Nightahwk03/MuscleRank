@@ -1143,3 +1143,12 @@ input:-webkit-autofill:active {
     -webkit-text-fill-color: white !important;
     transition: background-color 5000s ease-in-out 0s;
 }
+
+@keyframes packFadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.stagger-in {
+    opacity: 0;
+    animation: packFadeIn 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
