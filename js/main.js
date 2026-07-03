@@ -115,12 +115,19 @@ const SupabaseModule = {
                 payload[key] = localStorage.getItem(key);
             }
         }
+        const syncStatus = document.getElementById('cloud-sync-status');
+        if (syncStatus) syncStatus.innerHTML = '<span style="color: #bbb;">Syncing...</span>';
+
         const { error } = await supabaseClient.from('user_data').upsert({
             id: this.currentUser.id,
             data: payload
         });
         if (error) {
             console.error('Push Data Error:', error);
+            if (syncStatus) syncStatus.innerHTML = '<span style="color: #ff4444; cursor: pointer; text-decoration: underline;" onclick="alert(\`Cloud Sync Failed! Error: ' + error.message.replace(/'/g, "\\'") + '\`)">⚠️ Cloud Sync Error (Click to view)</span>';
+        } else {
+            if (syncStatus) syncStatus.innerHTML = '<span style="color: #00ff00;">✅ Saved to Cloud</span>';
+            setTimeout(() => { if (syncStatus) syncStatus.innerHTML = ''; }, 3000);
         }
     },
     scheduleSync() {
