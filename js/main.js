@@ -2399,9 +2399,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 packPullGrid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(200px, 1fr))';
                 packPullGrid.style.gap = '15px';
                 packPullGrid.innerHTML = '';
-                sets.forEach(setName => {
+                sets.forEach((setName, index) => {
                     const card = document.createElement('div');
-                    card.className = 'pokemon-card pack-item';
+                    card.className = 'pokemon-card pack-item stagger-in';
+                    card.style.animationDelay = `${index * 0.03}s`;
                     card.dataset.packName = setName;
                     card.style.display = 'flex';
                     card.style.flexDirection = 'column';
@@ -2416,7 +2417,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const logoUrl = (typeof PACK_LOGOS !== 'undefined' && PACK_LOGOS[setName]) ? PACK_LOGOS[setName] : null;
                     if (logoUrl) {
                         card.innerHTML = `
-                            <img src="${logoUrl}" alt="${setName}" style="max-height: 60px; max-width: 100%; object-fit: contain;">
+                            <img src="${logoUrl}" alt="${setName}" loading="lazy" style="max-height: 60px; max-width: 100%; object-fit: contain;">
                             <span style="color: var(--neon-primary); font-size: 0.9rem; font-weight: bold;">${setName}</span>
                         `;
                     } else {
@@ -2440,10 +2441,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 packPullGrid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(120px, 1fr))';
                 packPullGrid.innerHTML = '';
                 
-                images.forEach(cardData => {
+                images.forEach((cardData, index) => {
                     const imgPath = typeof cardData === 'string' ? cardData : cardData.image;
                     const img = document.createElement('img');
                     img.src = imgPath;
+                    img.loading = 'lazy';
                     img.style.width = '100%';
                     img.style.borderRadius = '8px';
                     img.style.boxShadow = '0 4px 8px rgba(0,0,0,0.3)';
@@ -2451,6 +2453,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     img.style.backgroundColor = 'rgba(0,0,0,0.2)';
                     
                     const cardWrapper = document.createElement('div');
+                    cardWrapper.className = 'stagger-in';
+                    cardWrapper.style.animationDelay = `${index * 0.05}s`;
                     cardWrapper.style.display = 'flex';
                     cardWrapper.style.flexDirection = 'column';
                     cardWrapper.style.alignItems = 'center';
