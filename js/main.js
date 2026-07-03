@@ -2700,6 +2700,7 @@ if (document.getElementById('show-login-btn')) {
         document.getElementById('show-register-btn').style.color = 'var(--text-secondary)';
         document.getElementById('auth-submit-btn').textContent = 'Sign In';
         document.getElementById('auth-username').style.display = 'none';
+        document.getElementById('forgot-password-btn').style.display = 'block';
         authErrorMsg.style.display = 'none';
     });
 
@@ -2711,6 +2712,7 @@ if (document.getElementById('show-login-btn')) {
         document.getElementById('show-login-btn').style.color = 'var(--text-secondary)';
         document.getElementById('auth-submit-btn').textContent = 'Create Account';
         document.getElementById('auth-username').style.display = 'block';
+        document.getElementById('forgot-password-btn').style.display = 'none';
         authErrorMsg.style.display = 'none';
     });
 
