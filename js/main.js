@@ -124,7 +124,8 @@ const SupabaseModule = {
         });
         if (error) {
             console.error('Push Data Error:', error);
-            if (syncStatus) syncStatus.innerHTML = '<span style="color: #ff4444; cursor: pointer; text-decoration: underline;" onclick="alert(\`Cloud Sync Failed! Error: ' + error.message.replace(/'/g, "\\'") + '\`)">⚠️ Cloud Sync Error (Click to view)</span>';
+            const errMsg = error.message || JSON.stringify(error);
+            if (syncStatus) syncStatus.innerHTML = '<div style="color: #ff4444; margin-top: 5px; text-align: left; background: rgba(255,0,0,0.1); padding: 5px; border-radius: 4px; font-size: 0.75rem; border: 1px solid #ff4444;">⚠️ Sync Failed:<br>' + errMsg + '</div>';
         } else {
             if (syncStatus) syncStatus.innerHTML = '<span style="color: #00ff00;">✅ Saved to Cloud</span>';
             setTimeout(() => { if (syncStatus) syncStatus.innerHTML = ''; }, 3000);
