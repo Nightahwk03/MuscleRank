@@ -92,6 +92,9 @@ const SupabaseModule = {
     async pullData() {
         if (!this.currentUser) return;
         const { data, error } = await supabaseClient.from('user_data').select('data').eq('id', this.currentUser.id).single();
+        if (error && error.code !== 'PGRST116') {
+            console.error('Pull Data Error:', error);
+        }
         if (data && data.data) {
             const payload = data.data;
             for (const key in payload) {
@@ -110,7 +113,15 @@ const SupabaseModule = {
                 payload[key] = localStorage.getItem(key);
             }
         }
-        await supabaseClient.from('user_data').upsert({ id: this.currentUser.id, data: payload });
+        const { error } = await supabaseClient.from('user_data').upsert({
+            id: this.currentUser.id,
+            data: payload,
+            updated_at: new Date().toISOString()
+        });
+        if (error) {
+            alert('Cloud Sync Error: ' + error.message);
+            console.error('Push Data Error:', error);
+        }
     },
     scheduleSync() {
         if (this.syncTimeout) clearTimeout(this.syncTimeout);
