@@ -14,6 +14,7 @@
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-brand">
                 <h1>MUSCLE<span class="highlight">RANK</span></h1>
+                <div id="sidebar-username-display" style="color: var(--text-secondary); font-size: 0.9rem; text-align: center; margin-top: 5px; font-family: 'Rajdhani', sans-serif; letter-spacing: 1px;"></div>
             </div>
             
             <nav class="sidebar-nav">
@@ -150,6 +151,9 @@
             <section id="profile" class="view hidden">
                 <div class="panel">
                     <h2>Profile</h2>
+                    <div style="margin-bottom: 20px; color: var(--text-secondary); font-size: 0.95rem; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px;">
+                        Logged in as: <strong id="profile-email-display" style="color: var(--neon-primary);"></strong>
+                    </div>
                     <form id="profile-form" class="exercise-form" style="margin-top: 20px;">
                         <div class="form-group">
                             <label>Username</label>
