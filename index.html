@@ -168,14 +168,16 @@
                         <!-- Pack Pull Module -->
             <section id="pack-pull" class="view hidden">
                 <div class="panel">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                          <h2 class="section-title">Pack Pull</h2>
-                      </div>
-                      <div style="display: flex; gap: 10px; margin-bottom: 20px;">
-                          <button id="pack-pull-back-btn" class="action-btn secondary-btn hidden" style="padding: 0.5rem 1rem;">&#8592; Back to Packs</button>
-                          <button id="pack-pull-random-btn" class="action-btn primary-btn hidden" style="padding: 0.5rem 1rem;">Pull Pack (6-8 cards)</button>
-                      </div>            </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <h2 class="section-title">Pack Pull</h2>
+                    </div>
+                    <div id="pack-search-container" style="margin-bottom: 20px;">
+                        <input type="text" id="pack-search-input" placeholder="Search packs..." style="width: 100%; padding: 0.8rem; background: rgba(0, 0, 0, 0.2); border: 1px solid #2A1642; color: #fff; border-radius: 8px;">
+                    </div>
+                    <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                        <button id="pack-pull-back-btn" class="action-btn secondary-btn hidden" style="padding: 0.5rem 1rem;">&#8592; Back to Packs</button>
+                        <button id="pack-pull-random-btn" class="action-btn primary-btn hidden" style="padding: 0.5rem 1rem;">Pull Pack (6-8 cards)</button>
+                    </div>
                     
                     <div id="pack-pull-grid" class="pokemon-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px;">
                         <!-- Pack Pull Images Injected Here -->
