@@ -2392,13 +2392,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 packPullBackBtn.classList.add('hidden');
                 if (packPullRandomBtn) packPullRandomBtn.classList.add('hidden');
                 
+                const searchContainer = document.getElementById('pack-search-container');
+                if (searchContainer) searchContainer.style.display = 'block';
+
                 packPullGrid.style.display = 'grid';
                 packPullGrid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(200px, 1fr))';
                 packPullGrid.style.gap = '15px';
                 packPullGrid.innerHTML = '';
                 sets.forEach(setName => {
                     const card = document.createElement('div');
-                    card.className = 'pokemon-card';
+                    card.className = 'pokemon-card pack-item';
+                    card.dataset.packName = setName;
                     card.style.display = 'flex';
                     card.style.flexDirection = 'column';
                     card.style.alignItems = 'center';
@@ -2421,6 +2425,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     
                     card.addEventListener('click', () => {
                         currentOpenedSet = setName;
+                        const searchContainer = document.getElementById('pack-search-container');
+                        if (searchContainer) searchContainer.style.display = 'none';
                         renderImages(PACK_PULL_DATA[setName] || []);
                     });
                     packPullGrid.appendChild(card);
@@ -2490,6 +2496,22 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // Initial render of all packs
             renderPacks();
+            
+            // Search logic
+            const searchInput = document.getElementById('pack-search-input');
+            if (searchInput) {
+                searchInput.addEventListener('input', (e) => {
+                    const query = e.target.value.toLowerCase();
+                    const packItems = document.querySelectorAll('.pack-item');
+                    packItems.forEach(item => {
+                        if (item.dataset.packName.toLowerCase().includes(query)) {
+                            item.style.display = 'flex';
+                        } else {
+                            item.style.display = 'none';
+                        }
+                    });
+                });
+            }
         }
     }
 
