@@ -701,8 +701,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const goalSelect = document.getElementById('settings-weekly-goal');
         if (goalSelect) goalSelect.value = settings.weeklyGoal || 5;
         
-        renderScrollPicker('bodyweight-picker', settings.bodyweight, 50, 400);
-        document.getElementById('current-bodyweight-display').textContent = `${settings.bodyweight} ${settings.unit}`;
+        renderScrollPicker('bodyweight-picker', Math.round(settings.bodyweight), 50, 400);
+        
+        const manualInput = document.getElementById('manual-bodyweight-input');
+        if (manualInput) manualInput.value = settings.bodyweight;
+        const unitLabel = document.getElementById('bodyweight-unit-label');
+        if (unitLabel) unitLabel.textContent = settings.unit;
         
         document.getElementById('final-settings-display').textContent = `${settings.bodyweight} ${settings.unit}`;
         const finalGoalDisplay = document.getElementById('final-settings-goal-display');
@@ -1247,8 +1251,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const activeItem = items[idx];
             if (activeItem) {
                 activeItem.classList.add('active');
-                const unit = document.getElementById('settings-weight-unit').value;
-                document.getElementById('current-bodyweight-display').textContent = `${activeItem.dataset.val} ${unit}`;
+                const manualInput = document.getElementById('manual-bodyweight-input');
+                // Only update the manual input if the user isn't actively typing in it
+                if (manualInput && document.activeElement !== manualInput) {
+                    manualInput.value = activeItem.dataset.val;
+                }
             }
             return idx;
         };
@@ -1292,8 +1299,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const unit = document.getElementById('settings-weight-unit').value;
         const goalSelect = document.getElementById('settings-weekly-goal');
         const weeklyGoal = goalSelect ? parseInt(goalSelect.value) : 5;
-        const activeItem = document.querySelector('#bodyweight-picker .scroll-picker-item.active');
-        const weight = activeItem ? parseInt(activeItem.dataset.val) : 150;
+        const manualInput = document.getElementById('manual-bodyweight-input');
+        const weight = manualInput && manualInput.value ? parseFloat(manualInput.value) : 150;
         SettingsModule.save(unit, weight, weeklyGoal);
         renderSettings();
         alert('Settings saved!');
@@ -2382,8 +2389,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 const searchContainer = document.getElementById('pack-search-container');
                 if (searchContainer) searchContainer.style.display = 'block';
 
-                packPullGrid.style.display = 'grid';
-                packPullGrid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(200px, 1fr))';
+                packPullGrid.style.display = 'flex';
+                packPullGrid.style.flexDirection = 'column';
+                packPullGrid.style.alignItems = 'center';
                 packPullGrid.style.gap = '15px';
                 packPullGrid.innerHTML = '';
                 sets.forEach((setName, index) => {
@@ -2392,23 +2400,44 @@ document.addEventListener('DOMContentLoaded', () => {
                     card.style.animationDelay = `${index * 0.03}s`;
                     card.dataset.packName = setName;
                     card.style.display = 'flex';
-                    card.style.flexDirection = 'column';
+                    card.style.aspectRatio = 'auto';
+                    card.style.flexDirection = 'row';
                     card.style.alignItems = 'center';
-                    card.style.justifyContent = 'center';
+                    card.style.justifyContent = 'space-between';
                     card.style.cursor = 'pointer';
-                    card.style.textAlign = 'center';
-                    card.style.padding = '15px';
-                    card.style.background = 'rgba(0,0,0,0.4)'; // Make background slightly darker to contrast logos
-                    card.style.gap = '10px';
+                    card.style.textAlign = 'left';
+                    card.style.padding = '15px 25px';
+                    card.style.background = 'rgba(0,0,0,0.4)';
+                    card.style.gap = '20px';
+                    card.style.width = '100%';
+                    card.style.maxWidth = '800px';
+                    card.style.borderRadius = '12px';
                     
+                    const allPackCards = PACK_PULL_DATA[setName] || [];
+                    const totalCards = allPackCards.length;
+                    let uniquePulled = 0;
+                    const unlockedSet = new Set(PokemonModule.getUnlocked());
+                    allPackCards.forEach(c => {
+                        const imgPath = typeof c === 'string' ? c : c.image;
+                        if (unlockedSet.has(imgPath)) uniquePulled++;
+                    });
+
                     const logoUrl = (typeof PACK_LOGOS !== 'undefined' && PACK_LOGOS[setName]) ? PACK_LOGOS[setName] : null;
                     if (logoUrl) {
                         card.innerHTML = `
-                            <img src="${logoUrl}" alt="${setName}" loading="lazy" style="max-height: 60px; max-width: 100%; object-fit: contain;">
-                            <span style="color: var(--neon-primary); font-size: 0.9rem; font-weight: bold;">${setName}</span>
+                            <div style="display: flex; flex-direction: column; flex: 1;">
+                                <span style="color: var(--neon-primary); font-size: 1rem; font-weight: bold;">${setName}</span>
+                                <span style="color: var(--text-secondary); font-size: 0.8rem; margin-top: 5px;">${uniquePulled} / ${totalCards} Collected</span>
+                            </div>
+                            <img src="${logoUrl}" alt="${setName}" loading="lazy" style="max-height: 45px; max-width: 140px; object-fit: contain;">
                         `;
                     } else {
-                        card.innerHTML = `<h3 style="color: var(--neon-primary); margin: 0; font-size: 1.2rem;">${setName}</h3>`;
+                        card.innerHTML = `
+                            <div style="display: flex; flex-direction: column; flex: 1;">
+                                <h3 style="color: var(--neon-primary); margin: 0; font-size: 1rem;">${setName}</h3>
+                                <span style="color: var(--text-secondary); font-size: 0.8rem; margin-top: 5px;">${uniquePulled} / ${totalCards} Collected</span>
+                            </div>
+                        `;
                     }
                     
                     card.addEventListener('click', () => {
@@ -2449,12 +2478,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     // Lightbox logic
                     img.style.cursor = 'pointer';
                     img.addEventListener('click', () => {
-                        const lightbox = document.getElementById('card-lightbox-modal');
-                        const lightboxImg = document.getElementById('lightbox-image');
-                        if (lightbox && lightboxImg) {
-                            lightboxImg.src = imgPath;
-                            lightbox.style.display = 'flex';
-                            lightbox.classList.remove('hidden');
+                        if (window.openLightbox) {
+                            window.openLightbox(images, index);
                         }
                     });
                     
@@ -2474,11 +2499,19 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (allCards.length === 0) return;
                     
                     const numPulls = Math.floor(Math.random() * 3) + 6; // 6 to 8 cards
-                    let pulled = [];
-                    for(let i=0; i<numPulls; i++) {
+                    const pulled = [];
+                    for (let i = 0; i < numPulls; i++) {
                         const randomIndex = Math.floor(Math.random() * allCards.length);
-                        pulled.push(allCards[randomIndex]);
+                        const card = allCards[randomIndex];
+                        pulled.push(card);
+                        
+                        // Add to unlocked collection if not already owned
+                        const imgPath = typeof card === 'string' ? card : card.image;
+                        if (!PokemonModule.unlocked.includes(imgPath)) {
+                            PokemonModule.unlocked.push(imgPath);
+                        }
                     }
+                    Storage.set('mr_pokemon_unlocked', PokemonModule.unlocked);
                     
                     PullLogModule.savePull(pulled, currentOpenedSet);
                     renderImages(pulled);
@@ -2574,7 +2607,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const grid = document.getElementById('pull-log-modal-grid');
                 grid.innerHTML = '';
                 
-                log.cards.forEach(cardData => {
+                log.cards.forEach((cardData, index) => {
                     const imgPath = typeof cardData === 'string' ? cardData : cardData.image;
                     const img = document.createElement('img');
                     img.src = imgPath;
@@ -2587,12 +2620,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     // Lightbox logic
                     img.style.cursor = 'pointer';
                     img.addEventListener('click', () => {
-                        const lightbox = document.getElementById('card-lightbox-modal');
-                        const lightboxImg = document.getElementById('lightbox-image');
-                        if (lightbox && lightboxImg) {
-                            lightboxImg.src = imgPath;
-                            lightbox.style.display = 'flex';
-                            lightbox.classList.remove('hidden');
+                        if (window.openLightbox) {
+                            window.openLightbox(log.cards, index);
                         }
                     });
                     
@@ -2672,19 +2701,78 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- LIGHTBOX LOGIC ---
     const lightboxModal = document.getElementById('card-lightbox-modal');
     const closeLightboxBtn = document.getElementById('close-lightbox-btn');
+    const lightboxPrevBtn = document.getElementById('lightbox-prev-btn');
+    const lightboxNextBtn = document.getElementById('lightbox-next-btn');
+    const lightboxImg = document.getElementById('lightbox-image');
+    
+    window.currentLightboxImages = [];
+    window.currentLightboxIndex = 0;
+    
+    window.openLightbox = (images, index) => {
+        if (!lightboxModal || !lightboxImg) return;
+        window.currentLightboxImages = images;
+        window.currentLightboxIndex = index;
+        updateLightboxView();
+        lightboxModal.style.display = 'flex';
+        lightboxModal.classList.remove('hidden');
+    };
+    
+    const updateLightboxView = () => {
+        if (window.currentLightboxImages.length === 0) return;
+        const currentData = window.currentLightboxImages[window.currentLightboxIndex];
+        lightboxImg.src = typeof currentData === 'string' ? currentData : currentData.image;
+        
+        if (lightboxPrevBtn) {
+            lightboxPrevBtn.style.opacity = window.currentLightboxIndex > 0 ? '1' : '0.2';
+            lightboxPrevBtn.style.cursor = window.currentLightboxIndex > 0 ? 'pointer' : 'default';
+        }
+        if (lightboxNextBtn) {
+            lightboxNextBtn.style.opacity = window.currentLightboxIndex < window.currentLightboxImages.length - 1 ? '1' : '0.2';
+            lightboxNextBtn.style.cursor = window.currentLightboxIndex < window.currentLightboxImages.length - 1 ? 'pointer' : 'default';
+        }
+    };
     
     if (lightboxModal && closeLightboxBtn) {
         const closeLightbox = () => {
             lightboxModal.style.display = 'none';
             lightboxModal.classList.add('hidden');
         };
-        
         closeLightboxBtn.addEventListener('click', closeLightbox);
         
-        // Close when clicking outside the image
+        if (lightboxPrevBtn) {
+            lightboxPrevBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (window.currentLightboxIndex > 0) {
+                    window.currentLightboxIndex--;
+                    updateLightboxView();
+                }
+            });
+        }
+        if (lightboxNextBtn) {
+            lightboxNextBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (window.currentLightboxIndex < window.currentLightboxImages.length - 1) {
+                    window.currentLightboxIndex++;
+                    updateLightboxView();
+                }
+            });
+        }
+        
         lightboxModal.addEventListener('click', (e) => {
-            if (e.target === lightboxModal) {
-                closeLightbox();
+            if (e.target === lightboxModal) closeLightbox();
+        });
+        
+        document.addEventListener('keydown', (e) => {
+            if (lightboxModal.style.display === 'flex') {
+                if (e.key === 'ArrowLeft' && window.currentLightboxIndex > 0) {
+                    window.currentLightboxIndex--;
+                    updateLightboxView();
+                } else if (e.key === 'ArrowRight' && window.currentLightboxIndex < window.currentLightboxImages.length - 1) {
+                    window.currentLightboxIndex++;
+                    updateLightboxView();
+                } else if (e.key === 'Escape') {
+                    closeLightbox();
+                }
             }
         });
     }
