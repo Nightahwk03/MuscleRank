@@ -1328,6 +1328,11 @@ document.addEventListener('DOMContentLoaded', () => {
             Storage.set('mr_pull_logs', []);
             PullLogModule.init();
             
+            // Reset Pokemon Collection
+            Storage.set('mr_pokemon_unlocked', []);
+            Storage.set('mr_pokemon_shiny', []);
+            PokemonModule.init();
+            
             // Future placeholders for Shop, Exp
             Storage.set('mr_exp', 0);
             Storage.set('mr_shop', []);
