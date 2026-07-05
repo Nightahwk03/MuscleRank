@@ -136,7 +136,10 @@
                                 </div>
                                 <div class="scroll-picker-highlight"></div>
                             </div>
-                            <div style="text-align: center; margin-top: 10px; font-size: 1.2rem; color: var(--neon-success);" id="current-bodyweight-display">-- lbs</div>
+                            <div style="text-align: center; margin-top: 15px; display: flex; justify-content: center; align-items: center; gap: 10px;">
+                                <input type="number" step="0.1" id="manual-bodyweight-input" style="width: 120px; padding: 0.5rem; background: rgba(0, 0, 0, 0.4); border: 1px solid var(--neon-success); color: var(--neon-success); border-radius: 8px; font-size: 1.5rem; text-align: center; font-weight: bold; outline: none;">
+                                <span style="font-size: 1.2rem; color: var(--neon-success);" id="bodyweight-unit-label">lbs</span>
+                            </div>
                         </div>
                         
                         <div style="display: flex; gap: 10px; margin-top: 20px;">
@@ -728,7 +731,9 @@
 
     <!-- Image Lightbox Modal -->
     <div id="card-lightbox-modal" class="modal hidden" style="z-index: 9999; display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); align-items: center; justify-content: center; backdrop-filter: blur(5px);">
-        <div style="position: relative; max-width: 90%; max-height: 90vh;">
+        <button id="lightbox-prev-btn" style="position: absolute; left: 20px; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.1); border: none; color: white; font-size: 2rem; cursor: pointer; border-radius: 50%; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; z-index: 10000; transition: background 0.2s;">&#10094;</button>
+        <button id="lightbox-next-btn" style="position: absolute; right: 20px; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.1); border: none; color: white; font-size: 2rem; cursor: pointer; border-radius: 50%; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; z-index: 10000; transition: background 0.2s;">&#10095;</button>
+        <div style="position: relative; max-width: 80%; max-height: 90vh;">
             <button id="close-lightbox-btn" style="position: absolute; top: -40px; right: 0; background: none; border: none; color: white; font-size: 2rem; cursor: pointer; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">&times;</button>
             <img id="lightbox-image" src="" alt="Card" style="max-width: 100%; max-height: 90vh; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.8);">
         </div>
