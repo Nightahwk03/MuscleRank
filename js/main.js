@@ -1290,6 +1290,11 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('settings-edit-view').classList.remove('hidden');
     });
 
+    document.getElementById('settings-weight-unit').addEventListener('change', (e) => {
+        const unitLabel = document.getElementById('bodyweight-unit-label');
+        if (unitLabel) unitLabel.textContent = e.target.value;
+    });
+
     document.getElementById('cancel-settings-btn').addEventListener('click', () => {
         document.getElementById('settings-display-view').classList.remove('hidden');
         document.getElementById('settings-edit-view').classList.add('hidden');
