@@ -436,7 +436,11 @@ const HistoryModule = {
         Storage.set('mr_history', this.history);
         ChangeLogModule.log('workout', `Completed Workout: ${workoutData.name}`);
     },
-    getAllHistory() { return this.history; }
+    getAllHistory() { return this.history; },
+    deleteWorkout(id) {
+        this.history = this.history.filter(w => w.id !== id);
+        Storage.set('mr_history', this.history);
+    }
 };
 
 const DraftModule = {
@@ -1934,9 +1938,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderTemplateBuilderExercises() {
         templateExercisesContainer.innerHTML = '';
+        let totalSets = 0;
+
         pendingTemplateExercises.forEach((exData, idx) => {
             const dbEx = ExerciseModule.getExerciseById(exData.id);
             if (!dbEx) return; // Skip deleted exercises
+            
+            totalSets += exData.setsCount;
+            if (dbEx.hasWarmup) totalSets += 1;
+            
             const row = document.createElement('div');
             row.style.display = 'flex';
             row.style.alignItems = 'center';
@@ -1951,12 +1961,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
                 <div style="display: flex; align-items: center; gap: 10px;">
                     <label style="font-size: 0.85rem; color: var(--text-secondary);">Sets:</label>
-                    <input type="number" min="1" value="${exData.setsCount}" class="set-input" style="width: 50px; text-align: center;" data-idx="${idx}">
+                    <input type="number" min="${dbEx.hasWarmup ? '0' : '1'}" value="${exData.setsCount}" class="set-input" style="width: 50px; text-align: center;" data-idx="${idx}">
                     <button class="action-btn danger-btn remove-tpl-ex-btn" data-idx="${idx}" style="padding: 4px 8px; font-size: 0.8rem;">X</button>
                 </div>
             `;
             templateExercisesContainer.appendChild(row);
         });
+
+        const totalSetsEl = document.getElementById('template-total-sets');
+        if (totalSetsEl) {
+            totalSetsEl.textContent = `${totalSets} Set${totalSets !== 1 ? 's' : ''} Total`;
+        }
 
         document.querySelectorAll('.remove-tpl-ex-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
@@ -1967,7 +1982,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         document.querySelectorAll('.set-input').forEach(input => {
             input.addEventListener('change', (e) => {
-                pendingTemplateExercises[e.target.dataset.idx].setsCount = Math.max(1, Number(e.target.value));
+                const idx = e.target.dataset.idx;
+                const dbEx = ExerciseModule.getExerciseById(pendingTemplateExercises[idx].id);
+                const minSets = (dbEx && dbEx.hasWarmup) ? 0 : 1;
+                const validatedSets = Math.max(minSets, Number(e.target.value));
+                e.target.value = validatedSets;
+                pendingTemplateExercises[idx].setsCount = validatedSets;
+                renderTemplateBuilderExercises();
             });
         });
     }
@@ -2089,6 +2110,63 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
+    function deleteLoggedWorkout(workoutId) {
+        const history = HistoryModule.getAllHistory();
+        const workout = history.find(w => w.id === workoutId);
+        if (!workout) return;
+
+        // Deduct XP
+        const userBw = SettingsModule.getSettings().bodyweight || 150;
+        const currentStreakMult = SettingsModule.getSettings().streakMultiplier || 1.0;
+
+        workout.exercises.forEach(exRef => {
+            const dbEx = ExerciseModule.getExerciseById(exRef.id);
+            if (!dbEx) return;
+            let maxWeight = 0;
+            let maxWeightReps = 0;
+            
+            exRef.sets.forEach(set => {
+                if (set.completed && set.weight >= maxWeight) {
+                    if (set.weight > maxWeight) {
+                        maxWeight = set.weight;
+                        maxWeightReps = set.reps;
+                    } else if (set.weight === maxWeight && set.reps > maxWeightReps) {
+                        maxWeightReps = set.reps;
+                    }
+                }
+            });
+            
+            if (maxWeight === 0 && maxWeightReps === 0) return;
+            if (dbEx.isBodyweight) {
+                maxWeight += userBw;
+            }
+            
+            const exXp = RankingModule.calculateExerciseXP(maxWeight, maxWeightReps, userBw, currentStreakMult);
+            if (exXp > 0) {
+                RankingModule.distributeXP(exRef.id, -exXp, ExerciseModule, false);
+            }
+        });
+
+        // Ensure no muscle XP drops below 0
+        RankingModule.getAllMuscles().forEach(muscle => {
+            if (muscle.xp < 0) muscle.xp = 0;
+            
+            // Recalculate rank just in case it dropped below the threshold
+            const newRankInfo = RankingModule.getRankForXP(muscle.xp);
+            muscle.rank = newRankInfo.name;
+        });
+        Storage.set('mr_muscles', RankingModule.getAllMuscles());
+
+        // Delete from history
+        HistoryModule.deleteWorkout(workoutId);
+        
+        // Log in Change Log
+        ChangeLogModule.log('delete', `Deleted logged workout: ${workout.name} (${new Date(workout.date).toLocaleDateString()})`);
+        
+        renderWorkoutLog();
+        alert('Workout deleted and XP safely deducted.');
+    }
+
     function renderWorkoutLog() {
         const historyListEl = document.getElementById('history-list');
         historyListEl.innerHTML = '';
@@ -2106,13 +2184,25 @@ document.addEventListener('DOMContentLoaded', () => {
                 return setsDone > 0 ? `${ex.name} (${setsDone} sets)` : '';
             }).filter(Boolean).join(', ');
             card.innerHTML = `
-                <div class="date">${date}</div>
-                <div style="margin-bottom: 0.5rem; color: var(--neon-success); font-weight: bold;">${workout.name}</div>
-                <div style="margin-bottom: 0.5rem;"><strong>Volume:</strong> ${workout.totalVolume} ${SettingsModule.getSettings().unit}</div>
+                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                    <div>
+                        <div class="date">${date}</div>
+                        <div style="margin-bottom: 0.5rem; color: var(--neon-success); font-weight: bold;">${workout.name}</div>
+                        <div style="margin-bottom: 0.5rem;"><strong>Volume:</strong> ${workout.totalVolume} ${SettingsModule.getSettings().unit}</div>
+                    </div>
+                    <button class="action-btn danger-btn delete-workout-btn" data-id="${workout.id}" style="padding: 4px 8px; font-size: 0.8rem; width: auto; min-width: 0; background: rgba(255, 68, 68, 0.1); border: 1px solid #ff4444; color: #ff4444;">DELETE</button>
+                </div>
                 <div style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 0.5rem;">
                     ${exercisesHtml}
                 </div>
             `;
+            
+            card.querySelector('.delete-workout-btn').addEventListener('click', (e) => {
+                if (confirm('Are you sure you want to delete this logged workout? The XP gained from this workout will be deducted from your muscles, which may result in a rank down.')) {
+                    deleteLoggedWorkout(workout.id);
+                }
+            });
+            
             historyListEl.appendChild(card);
         });
     }
