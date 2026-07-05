@@ -1968,10 +1968,39 @@ document.addEventListener('DOMContentLoaded', () => {
             templateExercisesContainer.appendChild(row);
         });
 
-        const totalSetsEl = document.getElementById('template-total-sets');
-        if (totalSetsEl) {
-            totalSetsEl.textContent = `${totalSets} Set${totalSets !== 1 ? 's' : ''} Total`;
+        let totalSetsEl = document.getElementById('template-total-sets');
+        if (!totalSetsEl) {
+            const headerDiv = document.createElement('div');
+            headerDiv.style.display = 'flex';
+            headerDiv.style.justifyContent = 'space-between';
+            headerDiv.style.alignItems = 'center';
+            headerDiv.style.marginTop = '20px';
+            headerDiv.style.marginBottom = '10px';
+            
+            const h3 = document.createElement('h3');
+            h3.style.margin = '0';
+            h3.style.color = 'var(--neon-primary)';
+            h3.style.fontSize = '1rem';
+            h3.textContent = 'Exercises';
+            
+            totalSetsEl = document.createElement('span');
+            totalSetsEl.id = 'template-total-sets';
+            totalSetsEl.style.color = 'var(--neon-primary)';
+            totalSetsEl.style.fontSize = '1rem';
+            totalSetsEl.style.fontWeight = 'bold';
+            totalSetsEl.style.background = 'rgba(0,0,0,0.3)';
+            totalSetsEl.style.padding = '4px 10px';
+            totalSetsEl.style.borderRadius = '6px';
+            totalSetsEl.style.border = '1px solid var(--neon-primary)';
+            totalSetsEl.style.textShadow = '0 0 8px var(--neon-primary)';
+            totalSetsEl.style.boxShadow = '0 0 10px rgba(187, 134, 252, 0.2)';
+            
+            headerDiv.appendChild(h3);
+            headerDiv.appendChild(totalSetsEl);
+            
+            templateExercisesContainer.parentNode.insertBefore(headerDiv, templateExercisesContainer);
         }
+        totalSetsEl.textContent = `${totalSets} Set${totalSets !== 1 ? 's' : ''} Total`;
 
         document.querySelectorAll('.remove-tpl-ex-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
