@@ -342,12 +342,48 @@ const RankingModule = {
             this.muscles = INITIAL_MUSCLES;
             Storage.set('mr_muscles', this.muscles);
         } else {
-            // Merge missing muscles (e.g., if forearms was just added)
+            // Merge missing muscles
             INITIAL_MUSCLES.forEach(im => {
                 if (!stored.find(m => m.id === im.id)) {
                     stored.push(im);
                 }
             });
+            
+            // Self-healing: if bodyweight wasn't set previously, xp might be NaN. Recalculate!
+            let hasCorruption = stored.some(m => isNaN(m.xp) || m.xp === null);
+            if (hasCorruption) {
+                stored.forEach(m => { m.xp = 0; m.rank = RANKS[0].name; });
+                const history = HistoryModule.getAllHistory();
+                history.forEach(workout => {
+                    const mult = SettingsModule.getSettings().streakMultiplier || 1.0;
+                    let bw = SettingsModule.getSettings().bodyweight || 70;
+                    // Simplify recovery using current bodyweight
+                    workout.exercises.forEach(exRef => {
+                        const dbEx = ExerciseModule.getExerciseById(exRef.id);
+                        if(!dbEx) return;
+                        let maxW = 0, maxR = 0;
+                        exRef.sets.forEach(set => {
+                            if(set.completed && set.weight >= maxW) {
+                                if(set.weight > maxW) { maxW = set.weight; maxR = set.reps; }
+                                else if (set.weight === maxW && set.reps > maxR) maxR = set.reps;
+                            }
+                        });
+                        if(maxW === 0 && maxR === 0) return;
+                        const xp = this.calculateExerciseXP(maxW, maxR, bw, mult);
+                        if(xp > 0) {
+                            const maxC = Math.max(...Object.values(dbEx.muscleContributions));
+                            Object.entries(dbEx.muscleContributions).forEach(([mId, perc]) => {
+                                const xpGain = Math.floor(xp * ((perc === maxC) ? perc : 0.3));
+                                const musc = stored.find(m => m.id === mId);
+                                if(musc) musc.xp += xpGain;
+                            });
+                        }
+                    });
+                });
+                // Assign ranks after full recovery
+                stored.forEach(m => { m.rank = this.getRankForXP(m.xp).name; });
+            }
+            
             this.muscles = stored;
             Storage.set('mr_muscles', this.muscles);
         }
@@ -2146,7 +2182,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!workout) return;
 
         // Deduct XP
-        const userBw = SettingsModule.getSettings().bodyweight || 150;
+        const userBw = SettingsModule.getSettings().bodyweight || 70;
         const currentStreakMult = SettingsModule.getSettings().streakMultiplier || 1.0;
 
         workout.exercises.forEach(exRef => {
@@ -2383,7 +2419,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const finalDate = logDateInput ? new Date(logDateInput).toISOString() : new Date().toISOString();
         
         // Find user's bodyweight at the time of this workout
-        let userBw = SettingsModule.getSettings().bodyweight;
+        let userBw = SettingsModule.getSettings().bodyweight || 70;
         const bwHistory = SettingsModule.getHistory().sort((a,b) => new Date(a.date) - new Date(b.date));
         for (let i = bwHistory.length - 1; i >= 0; i--) {
             if (new Date(bwHistory[i].date).getTime() <= new Date(finalDate).getTime()) {
