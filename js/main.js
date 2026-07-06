@@ -2166,9 +2166,6 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             
             if (maxWeight === 0 && maxWeightReps === 0) return;
-            if (dbEx.isBodyweight) {
-                maxWeight += userBw;
-            }
             
             const exXp = RankingModule.calculateExerciseXP(maxWeight, maxWeightReps, userBw, currentStreakMult);
             if (exXp > 0) {
@@ -2281,9 +2278,10 @@ document.addEventListener('DOMContentLoaded', () => {
             
             let setIndex = 0;
             if(dbEx.hasWarmup) {
-                let wVal = '', rVal = '';
+                let wVal = dbEx.isBodyweight ? (SettingsModule.getSettings().bodyweight || 0) : '';
+                let rVal = '';
                 if (exDraftData && exDraftData[setIndex]) {
-                    wVal = exDraftData[setIndex].weight || '';
+                    wVal = exDraftData[setIndex].weight !== undefined && exDraftData[setIndex].weight !== null ? exDraftData[setIndex].weight : wVal;
                     rVal = exDraftData[setIndex].reps || '';
                 }
                 html += `
@@ -2297,9 +2295,10 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             
             for(let s = 1; s <= exRef.setsCount; s++) {
-                let wVal = '', rVal = '';
+                let wVal = dbEx.isBodyweight ? (SettingsModule.getSettings().bodyweight || 0) : '';
+                let rVal = '';
                 if (exDraftData && exDraftData[setIndex]) {
-                    wVal = exDraftData[setIndex].weight || '';
+                    wVal = exDraftData[setIndex].weight !== undefined && exDraftData[setIndex].weight !== null ? exDraftData[setIndex].weight : wVal;
                     rVal = exDraftData[setIndex].reps || '';
                 }
                 html += `
@@ -2412,12 +2411,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 const rInput = repsInputs[idx];
                 let weight = Number(wInput.value) || 0;
                 const reps = Number(rInput.value) || 0;
-                
-                // If this is a bodyweight exercise, their actual bodyweight acts as the baseline weight, 
-                // plus whatever they entered in the weight box (e.g., added chains/plates).
-                if (dbEx.isBodyweight && (weight > 0 || reps > 0)) {
-                    weight += userBw;
-                }
                 
                 if (weight > 0 || reps > 0) {
                     sets.push({ weight, reps, completed: true, type: wInput.dataset.settype });
