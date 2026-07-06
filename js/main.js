@@ -1949,6 +1949,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const row = document.createElement('div');
             row.style.display = 'flex';
+            row.style.flexWrap = 'wrap';
             row.style.alignItems = 'center';
             row.style.justifyContent = 'space-between';
             row.style.background = 'rgba(255,255,255,0.05)';
