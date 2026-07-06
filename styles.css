@@ -1152,3 +1152,22 @@ input:-webkit-autofill:active {
     opacity: 0;
     animation: packFadeIn 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
 }
+
+/* Mobile UI Overflow Fixes */
+.set-row input {
+    min-width: 0; /* Prevents flexbox inputs from overflowing screen */
+}
+
+@media (max-width: 768px) {
+    .sidebar {
+        /* Use dynamic viewport height if supported, fallback to vh */
+        height: calc(100vh - 60px);
+        height: calc(100dvh - 60px);
+        padding-bottom: 80px; /* Ensures the bottom-most items are visible over browser navigation bars */
+    }
+    
+    .modal-content {
+        max-height: 85vh; /* Fallback */
+        max-height: 85dvh;
+    }
+}
