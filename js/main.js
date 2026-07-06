@@ -2288,7 +2288,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 html += `
                     <div class="set-row">
                         <label style="color: var(--neon-primary);">Warmup</label>
-                        <input type="number" class="log-weight" data-eidx="${eIdx}" data-settype="warmup" value="${wVal}" placeholder="Wt (${unit})" min="0">
+                        <input type="number" step="any" class="log-weight" data-eidx="${eIdx}" data-settype="warmup" value="${wVal}" placeholder="Wt (${unit})" min="0">
                         <input type="number" class="log-reps" data-eidx="${eIdx}" data-settype="warmup" value="${rVal}" placeholder="Reps" min="0">
                     </div>
                 `;
@@ -2305,7 +2305,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 html += `
                     <div class="set-row">
                         <label>Set ${s}</label>
-                        <input type="number" class="log-weight" data-eidx="${eIdx}" data-settype="regular" data-setidx="${s}" value="${wVal}" placeholder="Wt (${unit})" min="0">
+                        <input type="number" step="any" class="log-weight" data-eidx="${eIdx}" data-settype="regular" data-setidx="${s}" value="${wVal}" placeholder="Wt (${unit})" min="0">
                         <input type="number" class="log-reps" data-eidx="${eIdx}" data-settype="regular" data-setidx="${s}" value="${rVal}" placeholder="Reps" min="0">
                     </div>
                 `;
