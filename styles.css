@@ -1182,3 +1182,10 @@ input:-webkit-autofill:active {
         width: 100%;
     }
 }
+
+/* Bottom Stats Grid Responsive */
+@media (max-width: 900px) {
+    .stats-bottom-grid {
+        grid-template-columns: 1fr !important;
+    }
+}
