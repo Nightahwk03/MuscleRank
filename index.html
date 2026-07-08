@@ -32,6 +32,7 @@
                     <div class="sidebar-heading">Social</div>
                     <div class="sidebar-items">
                         <button class="nav-btn" data-target="rivals">Rivals</button>
+                        <button class="nav-btn" data-target="my-card" id="my-card-nav-btn">My Card</button>
                     </div>
                 </div>
 
@@ -752,6 +753,18 @@
             <h2 class="rainbow-text">RANK UP!</h2>
             <p id="rank-up-message"></p>
             <button id="close-modal-btn" class="action-btn primary-btn">AWESOME</button>
+        </div>
+    </div>
+
+    <!-- Showcase Replacement Modal -->
+    <div id="showcase-replace-modal" class="modal hidden" style="z-index: 10003;">
+        <div class="modal-content" style="max-width: 600px; width: 95%; text-align: center;">
+            <h2 style="color: var(--neon-primary); margin-bottom: 1rem;">Showcase Full</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">You can only showcase 3 cards at a time. Select a card below to replace it with your new one.</p>
+            <div id="showcase-replace-grid" style="display: flex; gap: 15px; justify-content: center; margin-bottom: 2rem;">
+                <!-- Current showcased cards injected here -->
+            </div>
+            <button id="close-showcase-replace-btn" class="action-btn secondary-btn" style="width: auto; padding: 10px 20px;">Cancel</button>
         </div>
     </div>
 
