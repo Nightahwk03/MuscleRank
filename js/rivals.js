@@ -557,7 +557,7 @@ const RivalsModule = {
         container.style.gap = '25px';
         container.style.flexWrap = 'nowrap';
         container.style.overflowX = 'auto';
-        container.style.padding = '20px';
+        container.style.padding = '40px 20px';
         container.style.maxWidth = '100%';
 
         urls.forEach((url, index) => {
