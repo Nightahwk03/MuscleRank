@@ -450,16 +450,16 @@ const RivalsModule = {
         container.innerHTML = '';
         
         if (sorted.length === 0) {
-            container.innerHTML = '<p style="color: var(--text-secondary); font-size: 0.9rem;">No lifts recorded.</p>';
+            container.innerHTML = '<p style="color: var(--text-secondary); font-size: 1.1rem;">No lifts recorded.</p>';
             return;
         }
 
         sorted.forEach((lift, idx) => {
             const div = document.createElement('div');
-            div.style.cssText = 'background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; border-left: 3px solid ' + (idx === 0 ? 'gold' : idx === 1 ? 'silver' : '#CD7F32');
+            div.style.cssText = 'background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid ' + (idx === 0 ? 'gold' : idx === 1 ? 'silver' : '#CD7F32');
             div.innerHTML = `
-                <div style="font-weight: bold;">${lift.name}</div>
-                <div style="color: var(--neon-primary); font-weight: bold;">${lift.weight}kg <span style="color: var(--text-secondary); font-weight: normal; font-size: 0.8rem;">x ${lift.reps}</span></div>
+                <div style="font-weight: bold; font-size: 1.2rem;">${lift.name}</div>
+                <div style="color: var(--neon-primary); font-weight: bold; font-size: 1.3rem;">${lift.weight}kg <span style="color: var(--text-secondary); font-weight: normal; font-size: 1rem;">x ${lift.reps}</span></div>
             `;
             container.appendChild(div);
         });
