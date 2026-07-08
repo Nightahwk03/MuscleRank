@@ -430,7 +430,7 @@ const RankingModule = {
                             }
                         });
                         if(maxW === 0 && maxR === 0) return;
-                        const xp = this.calculateExerciseXP(maxW, maxR, bw, mult);
+                        const xp = this.calculateExerciseXP(maxW, maxR, bw, mult, dbEx.isBodyweight);
                         if(xp > 0) {
                             const maxC = Math.max(...Object.values(dbEx.muscleContributions));
                             Object.entries(dbEx.muscleContributions).forEach(([mId, perc]) => {
@@ -450,13 +450,21 @@ const RankingModule = {
         }
     },
     getAllMuscles() { return this.muscles; },
-    calculateExerciseXP(topWeight, reps, userBodyweight, streakMultiplier) {
+    calculateExerciseXP(topWeight, reps, userBodyweight, streakMultiplier, isBodyweight = false) {
         const baseExp = 50;
-        let weightMultiplier = 0;
         
-        if (topWeight === 0) {
-            weightMultiplier = 0;
+        if (reps === 0) return 0;
+
+        if (isBodyweight) {
+            // Bodyweight exercise logic: every 5 reps increases base exp by 10%
+            // 1-5 reps = 100%, 6-10 reps = 110%, 11-15 reps = 120%
+            const repBonus = Math.floor((reps - 1) / 5) * 0.1;
+            const bwMultiplier = 1.0 + repBonus;
+            
+            return Math.floor(baseExp * bwMultiplier * streakMultiplier);
         } else {
+            // Weighted exercise logic
+            let weightMultiplier = 0;
             const ratio = topWeight / userBodyweight;
             if (ratio <= 0.5) weightMultiplier = 0.8;
             else if (ratio <= 0.75) weightMultiplier = 0.9;
@@ -469,15 +477,14 @@ const RankingModule = {
                 const excess = ratio - 2.0;
                 weightMultiplier = 1.5 + (Math.floor(excess / 0.25) + 1) * 0.2;
             }
+            
+            let repMultiplier = 1.0;
+            if (reps >= 1 && reps <= 5) repMultiplier = 0.8;
+            else if (reps >= 6 && reps <= 11) repMultiplier = 1.2;
+            else if (reps >= 12) repMultiplier = 1.0;
+            
+            return Math.floor(baseExp * weightMultiplier * repMultiplier * streakMultiplier);
         }
-        
-        let repMultiplier = 1.0;
-        if (reps >= 1 && reps <= 5) repMultiplier = 0.8;
-        else if (reps >= 6 && reps <= 11) repMultiplier = 1.2;
-        else if (reps >= 12) repMultiplier = 1.0;
-        
-        const finalExp = Math.floor(baseExp * weightMultiplier * repMultiplier * streakMultiplier);
-        return finalExp;
     },
     distributeXP(exerciseId, rawXP, exerciseModule, isWarmup = false) {
         const exercise = exerciseModule.getExerciseById(exerciseId);
@@ -2326,7 +2333,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             if (maxWeight === 0 && maxWeightReps === 0) return;
             
-            const exXp = RankingModule.calculateExerciseXP(maxWeight, maxWeightReps, userBw, currentStreakMult);
+            const exXp = RankingModule.calculateExerciseXP(maxWeight, maxWeightReps, userBw, currentStreakMult, dbEx.isBodyweight);
             if (exXp > 0) {
                 RankingModule.distributeXP(exRef.id, -exXp, ExerciseModule, false);
             }
@@ -2587,7 +2594,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // Calculate and Distribute XP
             const currentStreakMult = SettingsModule.getSettings().streakMultiplier;
-            const exXp = RankingModule.calculateExerciseXP(maxWeight, maxWeightReps, userBw, currentStreakMult);
+            const exXp = RankingModule.calculateExerciseXP(maxWeight, maxWeightReps, userBw, currentStreakMult, dbEx.isBodyweight);
             
             if (exXp > 0) {
                 const rankUps = RankingModule.distributeXP(exRef.id, exXp, ExerciseModule, false);
