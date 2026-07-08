@@ -344,10 +344,8 @@ const RivalsModule = {
             document.getElementById('player-card-perfect-weeks').textContent = perfectWeeks;
 
             // Bodygraph
-            if (data.mr_muscles) {
-                const muscles = JSON.parse(data.mr_muscles);
-                this.renderRivalBodygraph(muscles);
-            }
+            const muscles = data.mr_muscles ? JSON.parse(data.mr_muscles) : {};
+            this.renderRivalBodygraph(muscles);
 
             // Top Lifts
             if (data.mr_history) {
