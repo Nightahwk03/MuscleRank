@@ -718,82 +718,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const views = document.querySelectorAll('.view');
     const muscleListEl = document.getElementById('muscle-list');
     
-    navBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            const target = btn.dataset.target;
-            if (target === 'my-card') return;
-            Storage.set('mr_last_view', target);
-            
-            navBtns.forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            
-            const currentActiveView = document.querySelector('.view.active') || document.querySelector('.view[style*="display: block"]');
-            
-            if (currentActiveView) {
-                currentActiveView.style.opacity = '0';
-                setTimeout(() => {
-                    views.forEach(v => {
-                        v.classList.remove('active');
-                        v.style.display = 'none';
-                        v.style.opacity = '0';
-                    });
-                    const targetView = document.getElementById(target);
-                    targetView.classList.add('active');
-                    targetView.style.display = 'block';
-                    // Trigger reflow
-                    void targetView.offsetWidth;
-                    targetView.style.opacity = '1';
-
-                    // Re-render specific modules if needed
-                    if (target === 'analytics') {
-                        AnalyticsModule.renderCharts();
-                    } else if (target === 'exercise-master') {
-                        renderExerciseMaster();
-                    } else if (target === 'workout-master') {
-                        renderWorkoutMaster();
-                    } else if (target === 'record-session') {
-                        renderRecordSession();
-                    } else if (target === 'history') {
-                        HistoryModule.init();
-                    } else if (target === 'statistics') {
-                        renderStatistics();
-                    } else if (target === 'pack-pull') {
-                        renderPackPull();
-                    } else if (target === 'pull-log') {
-                        renderPullLog();
-                    } else if (target === 'social') {
-                        renderSocial();
-                    } else if (target === 'rivals') {
-                        if (typeof RivalsModule !== 'undefined') RivalsModule.init();
-                    } else if (target === 'change-log') {
-                        ChangeLogModule.renderLogs();
-                    } else if (target === 'muscle-rankings') {
-                        renderDashboard();
-                        RankingModule.init();
-                    } else if (target === 'pokeweight') {
-                        if (typeof PokeweightModule !== 'undefined') PokeweightModule.init();
-                    }
-                }, 150); // wait for fade out
-            } else {
-                // Fallback if no active view (e.g. first load)
-                views.forEach(v => {
-                    v.classList.remove('active');
-                    v.style.display = 'none';
-                    v.style.opacity = '0';
-                });
-                const targetView = document.getElementById(target);
-                targetView.classList.add('active');
-                targetView.style.display = 'block';
-                void targetView.offsetWidth;
-                targetView.style.opacity = '1';
-            }
-
-            if (window.innerWidth <= 768) {
-                document.querySelector('.sidebar').classList.remove('open');
-            }
-        });
+    // Add smooth transition to views
+    views.forEach(v => {
+        v.style.transition = 'opacity 0.15s ease-in-out';
     });
 
+    // Workout Template DOM
+    const workoutTemplatesView = document.getElementById('workout-templates-view');
     const templatesList = document.getElementById('templates-list');
     const createTemplateBtn = document.getElementById('create-template-btn');
     const templateBuilderView = document.getElementById('template-builder-view');
@@ -3413,11 +3344,4 @@ if (toggleResetConfirmBtn && resetConfirmInput) {
     });
 
 });
-
-
-
-
-
-
-
 
