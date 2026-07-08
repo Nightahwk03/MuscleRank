@@ -2796,7 +2796,7 @@ document.addEventListener('DOMContentLoaded', () => {
             listEl.innerHTML = '<p style="color: var(--text-secondary); text-align: center;">No pulls logged yet.</p>';
             return;
         }
-`n    const closePullLogModalBtn = document.getElementById('close-pull-log-modal-btn');`n    if (closePullLogModalBtn) {`n        closePullLogModalBtn.addEventListener('click', () => {`n            document.getElementById('pull-log-modal').classList.add('hidden');`n        });`n    }`n        
+        
         logs.forEach(log => {
             const dateObj = new Date(log.date);
             const dateStr = dateObj.toLocaleDateString();
@@ -2878,6 +2878,13 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             
             listEl.appendChild(card);
+        });
+    }
+
+    const closePullLogModalBtn = document.getElementById('close-pull-log-modal-btn');
+    if (closePullLogModalBtn) {
+        closePullLogModalBtn.addEventListener('click', () => {
+            document.getElementById('pull-log-modal').classList.add('hidden');
         });
     }
 
@@ -3295,6 +3302,7 @@ document.addEventListener('keydown', (e) => {
     });
 
 });
+
 
 
 
