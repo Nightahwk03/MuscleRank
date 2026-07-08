@@ -563,25 +563,14 @@ const RivalsModule = {
             const isShiny = url.includes('Shiny');
             const borderColor = isShiny ? '#FFD700' : 'var(--neon-primary)';
             
-            // The "square" holder design requested
-            cardWrap.style.cssText = `
-                width: 180px; 
-                height: 200px; 
-                border: 2px solid ${borderColor}; 
-                border-radius: 12px; 
-                display: flex; 
-                align-items: center; 
-                justify-content: center; 
-                background: linear-gradient(135deg, rgba(0,0,0,0.6) 0%, rgba(20,10,35,0.8) 100%); 
-                box-shadow: inset 0 0 15px rgba(0,0,0,0.8), 0 0 12px ${borderColor}60; 
-                position: relative;
-                overflow: hidden;
-            `;
+            // Apply responsive classes
+            cardWrap.className = 'showcase-card-wrapper';
+            cardWrap.style.border = '2px solid ' + borderColor;
+            cardWrap.style.boxShadow = 'inset 0 0 15px rgba(0,0,0,0.8), 0 0 12px ' + borderColor + '60';
             
             const img = document.createElement('img');
             img.src = url;
-            // Aspect ratio 1:1.4
-            img.style.cssText = 'width: 120px; height: 168px; object-fit: contain; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.5)); transition: transform 0.3s ease;';
+            img.className = 'showcase-card-img';
             
             // Hover effect for the card itself
             cardWrap.onmouseover = () => {
