@@ -296,7 +296,7 @@ const RivalsModule = {
                 try {
                     showcaseUrls = JSON.parse(profileDoc.data().mr_pokemon);
                 } catch(e) {}
-                this.renderRivalShowcase(showcaseUrls);
+                this.renderRivalShowcase(showcaseUrls, isMe);
             }
 
             // Extract Bodyweight
@@ -528,7 +528,7 @@ const RivalsModule = {
         });
     },
 
-    renderRivalShowcase(urls) {
+    renderRivalShowcase(urls, isMe = false) {
         const container = document.getElementById('player-card-showcase');
         
         if (!urls || urls.length === 0) {
@@ -569,19 +569,65 @@ const RivalsModule = {
             img.style.cssText = 'width: 140px; height: 196px; object-fit: contain; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.5)); transition: transform 0.3s ease;';
             
             // Hover effect for the card itself
-            cardWrap.onmouseover = () => img.style.transform = 'scale(1.1) translateY(-5px)';
-            cardWrap.onmouseout = () => img.style.transform = 'scale(1) translateY(0)';
-            
-            // Add Lightbox onclick
-            cardWrap.style.cursor = 'pointer';
-            cardWrap.onclick = () => {
-                if (window.openLightbox) {
-                    window.openLightbox(urls, index);
-                }
+            cardWrap.onmouseover = () => {
+                img.style.transform = 'scale(1.05)';
+            };
+            cardWrap.onmouseout = () => {
+                img.style.transform = 'scale(1)';
             };
             
+            // Full screen view on click
+            cardWrap.style.cursor = 'pointer';
+            cardWrap.onclick = () => {
+                if(window.openLightbox) window.openLightbox(url);
+            };
+
             cardWrap.appendChild(img);
-            container.appendChild(cardWrap);
+            
+            const itemContainer = document.createElement('div');
+            itemContainer.style.display = 'flex';
+            itemContainer.style.flexDirection = 'column';
+            itemContainer.style.alignItems = 'center';
+            itemContainer.style.gap = '10px';
+            itemContainer.appendChild(cardWrap);
+
+            if (isMe) {
+                const controlsContainer = document.createElement('div');
+                controlsContainer.style.display = 'flex';
+                controlsContainer.style.gap = '10px';
+                
+                if (index > 0) {
+                    const leftBtn = document.createElement('button');
+                    leftBtn.className = 'action-btn secondary-btn';
+                    leftBtn.style.cssText = 'width: 30px; height: 30px; padding: 0; display: flex; align-items: center; justify-content: center; font-weight: bold; border-radius: 4px; font-size: 1.2rem;';
+                    leftBtn.textContent = '<';
+                    leftBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        ShowcaseModule.swapCards(index, index - 1);
+                        RivalsModule.renderRivalShowcase(ShowcaseModule.getShowcase(), true);
+                    };
+                    controlsContainer.appendChild(leftBtn);
+                }
+                
+                if (index < urls.length - 1) {
+                    const rightBtn = document.createElement('button');
+                    rightBtn.className = 'action-btn secondary-btn';
+                    rightBtn.style.cssText = 'width: 30px; height: 30px; padding: 0; display: flex; align-items: center; justify-content: center; font-weight: bold; border-radius: 4px; font-size: 1.2rem;';
+                    rightBtn.textContent = '>';
+                    rightBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        ShowcaseModule.swapCards(index, index + 1);
+                        RivalsModule.renderRivalShowcase(ShowcaseModule.getShowcase(), true);
+                    };
+                    controlsContainer.appendChild(rightBtn);
+                }
+                
+                if (controlsContainer.hasChildNodes()) {
+                    itemContainer.appendChild(controlsContainer);
+                }
+            }
+
+            container.appendChild(itemContainer);
         });
     }
 };

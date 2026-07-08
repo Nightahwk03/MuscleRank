@@ -579,6 +579,15 @@ const ShowcaseModule = {
         this.syncToProfile();
         ChangeLogModule.log('social', "Updated your Pokemon Showcase.");
     },
+    swapCards(index1, index2) {
+        if (index1 >= 0 && index1 < this.showcase.length && index2 >= 0 && index2 < this.showcase.length) {
+            const temp = this.showcase[index1];
+            this.showcase[index1] = this.showcase[index2];
+            this.showcase[index2] = temp;
+            Storage.set('mr_pokemon_showcase', this.showcase);
+            this.syncToProfile();
+        }
+    },
     syncToProfile() {
         if (FirebaseModule.currentUser) {
             db.collection('user_profiles').doc(FirebaseModule.currentUser.uid).set({
@@ -1439,7 +1448,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     document.getElementById('reset-data-btn').addEventListener('click', () => {
-        const confirmed = confirm("Are you sure you want to reset all progress data? This will wipe your Workout Logs, Ranks, XP, and Pull Logs, but will keep your Templates, Exercises, Profile, and Settings intact.");
+        const confirmed = confirm("Are you sure you want to reset all progress data? This will wipe your Workout Logs, Ranks, XP, Pull Logs, Showcased Cards, and Exercise Master, but will keep your Workout Templates (Workout Master), Profile, and Settings intact.");
         if (confirmed) {
             // Reset History (Workout Logs)
             Storage.set('mr_history', []);
@@ -1461,15 +1470,16 @@ document.addEventListener('DOMContentLoaded', () => {
             Storage.set('mr_muscles', JSON.parse(JSON.stringify(INITIAL_MUSCLES)));
             RankingModule.init();
 
+            // Reset Exercise Master
+            Storage.set('mr_exercises', JSON.parse(JSON.stringify(INITIAL_EXERCISES)));
+            ExerciseModule.init();
+
             // Reset Pull Logs
             Storage.set('mr_pull_logs', []);
             PullLogModule.init();
             
-            // Reset Pokemon Collection
-            Storage.set('mr_pokemon_unlocked', []);
-            Storage.set('mr_pokemon_shiny', []);
+            // Reset Showcased Cards
             Storage.set('mr_pokemon_showcase', []);
-            PokemonModule.init();
             ShowcaseModule.init();
             if (typeof ShowcaseModule.syncToProfile === 'function') {
                 ShowcaseModule.syncToProfile(); // Clear public player card showcase
