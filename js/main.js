@@ -1437,6 +1437,9 @@ document.addEventListener('DOMContentLoaded', () => {
             Storage.set('mr_pokemon_showcase', []);
             PokemonModule.init();
             ShowcaseModule.init();
+            if (typeof ShowcaseModule.syncToProfile === 'function') {
+                ShowcaseModule.syncToProfile(); // Clear public player card showcase
+            }
             
             // Future placeholders for Shop, Exp
             Storage.set('mr_exp', 0);
@@ -3200,7 +3203,7 @@ document.addEventListener('keydown', (e) => {
     let pendingShowcaseCard = null;
     
     window.attemptSetShowcase = function(sprite, isShiny) {
-        const url = (isShiny ? 'Shiny Pokemon/' : 'pokemon-sprites/') + sprite;
+        const url = sprite.startsWith('http') ? sprite : (isShiny ? 'Shiny Pokemon/' : 'pokemon-sprites/') + sprite;
         const currentShowcase = ShowcaseModule.getShowcase();
         
         if (currentShowcase.length < 3) {
