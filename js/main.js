@@ -1501,6 +1501,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 ShowcaseModule.syncToProfile(); // Clear public player card showcase
             }
             
+            // Reset Pokemon Collection
+            Storage.set('mr_pokemon_unlocked', []);
+            Storage.set('mr_pokemon_shiny', []);
+            PokemonModule.init();
+            
             // Future placeholders for Shop, Exp
             Storage.set('mr_exp', 0);
             Storage.set('mr_shop', []);
