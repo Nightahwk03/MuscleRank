@@ -1189,3 +1189,39 @@ input:-webkit-autofill:active {
         grid-template-columns: 1fr !important;
     }
 }
+
+/* Showcase Card Styles */
+.showcase-card-wrapper {
+    width: 240px;
+    height: 280px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, rgba(0,0,0,0.6) 0%, rgba(20,10,35,0.8) 100%);
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.showcase-card-img {
+    width: 160px;
+    height: 224px;
+    object-fit: contain;
+    filter: drop-shadow(0 10px 15px rgba(0,0,0,0.5));
+    transition: transform 0.3s ease;
+}
+
+@media (max-width: 768px) {
+    .showcase-card-wrapper {
+        width: 140px;
+        height: 180px;
+    }
+    .showcase-card-img {
+        width: 100px;
+        height: 140px;
+    }
+    #player-card-showcase {
+        gap: 15px !important;
+    }
+}
