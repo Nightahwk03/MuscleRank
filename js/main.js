@@ -715,6 +715,7 @@ document.addEventListener('DOMContentLoaded', () => {
     navBtns.forEach(btn => {
         btn.addEventListener('click', () => {
             const target = btn.dataset.target;
+            if (target === 'my-card') return;
             Storage.set('mr_last_view', target);
             
             navBtns.forEach(b => b.classList.remove('active'));
@@ -2706,7 +2707,24 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                     });
                     
+                    const btn = document.createElement('button');
+                    btn.className = 'action-btn secondary-btn';
+                    btn.style.marginTop = '10px';
+                    btn.style.fontSize = '0.8rem';
+                    btn.style.width = 'auto';
+                    btn.style.padding = '5px 10px';
+                    btn.textContent = 'Set on Display';
+                    btn.onclick = (e) => {
+                        e.stopPropagation();
+                        const isShiny = imgPath.includes('Shiny Pokemon');
+                        // Extract filename from path
+                        const parts = imgPath.split('/');
+                        const sprite = parts[parts.length - 1];
+                        window.attemptSetShowcase(sprite, isShiny);
+                    };
+                    
                     cardWrapper.appendChild(img);
+                    cardWrapper.appendChild(btn);
                     
                     packPullGrid.appendChild(cardWrapper);
                 });
@@ -2847,12 +2865,27 @@ document.addEventListener('DOMContentLoaded', () => {
                             window.openLightbox(log.cards, index);
                         }
                     });
+
+                    const btn = document.createElement('button');
+                    btn.className = 'action-btn secondary-btn';
+                    btn.style.marginTop = '10px';
+                    btn.style.fontSize = '0.8rem';
+                    btn.style.width = 'auto';
+                    btn.style.padding = '5px 10px';
+                    btn.textContent = 'Set on Display';
+                    btn.onclick = (e) => {
+                        e.stopPropagation(); // prevent opening lightbox
+                        const sprite = typeof cardData === 'string' ? cardData : cardData.image;
+                        const isShiny = typeof cardData === 'object' && cardData.isShiny;
+                        window.attemptSetShowcase(sprite, isShiny);
+                    };
                     
                     const c = document.createElement('div');
                     c.style.display = 'flex';
                     c.style.flexDirection = 'column';
                     c.style.alignItems = 'center';
                     c.appendChild(img);
+                    c.appendChild(btn);
                     grid.appendChild(c);
                 });
                 
@@ -3297,3 +3330,4 @@ document.addEventListener('keydown', (e) => {
     });
 
 });
+

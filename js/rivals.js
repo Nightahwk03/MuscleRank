@@ -332,7 +332,7 @@ const RivalsModule = {
     renderRivalBodygraph(muscles) {
         const container = document.getElementById('player-card-bodygraph');
         
-        const existingGraph = document.querySelector('.body-graph-container svg');
+        const existingGraph = document.querySelector('.body-map-container svg');
         if (existingGraph) {
             const clone = existingGraph.cloneNode(true);
             
