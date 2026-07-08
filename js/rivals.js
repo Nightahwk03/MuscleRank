@@ -348,15 +348,45 @@ const RivalsModule = {
             clone.style.display = 'block';
             clone.style.margin = '0 auto';
             
-            const rankColors = {
-                'Wood': '#8B5A2B', 'Bronze': '#CD7F32', 'Silver': '#C0C0C0',
-                'Gold': '#FFD700', 'Diamond': '#00BFFF', 'Platinum': '#E5E4E2',
-                'Obsidian': '#4B0082', 'Titanium': '#C0C0C0', 'Demon': '#ff0000'
-            };
-
-            const getColor = (rankStr) => {
-                const base = rankStr.split(' ')[0];
-                return rankColors[base] || '#333';
+            const getRankVisuals = (rankName) => {
+                const parts = rankName.split(' ');
+                const baseRank = parts[0]; 
+                const tierStr = parts[1];
+                
+                const mapping = {
+                    'Unranked': { solid: '#FFFFFF', gradient: '#FFFFFF' },
+                    'Wood': { solid: '#D2B48C', gradient: 'linear-gradient(135deg, #D2B48C, #A0522D)' },
+                    'Bronze': { solid: '#CD7F32', gradient: 'linear-gradient(135deg, #8B4513, #FFA500)' },
+                    'Silver': { solid: '#C0C0C0', gradient: 'linear-gradient(135deg, #D3D3D3, #FFFFFF)' },
+                    'Gold': { solid: '#FFD700', gradient: 'linear-gradient(135deg, #FFD700, #DAA520)' },
+                    'Diamond': { solid: '#9B30FF', gradient: 'linear-gradient(135deg, #8A2BE2, #FFFFFF)' },
+                    'Platinum': { solid: '#E5E4E2', gradient: 'linear-gradient(135deg, #FFC0CB, #FFFFFF, #A9A9A9)' },
+                    'Obsidian': { solid: '#4B0082', gradient: 'linear-gradient(135deg, #000000, #4B0082)' },
+                    'Titanium': { solid: '#E6E6FA', gradient: 'linear-gradient(135deg, #808080, #C0C0C0, #FFFFFF)' },
+                    'Demon': { solid: '#FF4500', gradient: 'linear-gradient(135deg, #FF0000, #FF4500, #FFFF00)' }
+                };
+                const baseVisuals = mapping[baseRank] || mapping['Unranked'];
+                
+                if (baseRank === 'Unranked' || !tierStr) return baseVisuals;
+                
+                const tier = parseInt(tierStr);
+                const percent = (3 - tier) * 0.20;
+                if (percent === 0) return baseVisuals;
+                
+                const shadeHexColor = (color, percent) => {
+                    const f = parseInt(color.slice(1), 16),
+                          t = percent < 0 ? 0 : 255,
+                          p = Math.abs(percent),
+                          R = f >> 16,
+                          G = f >> 8 & 0x00FF,
+                          B = f & 0x0000FF;
+                    return "#" + (0x1000000 + (Math.round((t - R) * p) + R) * 0x10000 + (Math.round((t - G) * p) + G) * 0x100 + (Math.round((t - B) * p) + B)).toString(16).slice(1);
+                };
+                
+                return {
+                    solid: shadeHexColor(baseVisuals.solid, percent),
+                    gradient: baseVisuals.gradient.replace(/#[0-9a-fA-F]{6}/g, match => shadeHexColor(match, percent))
+                };
             };
             
             const muscleToSlugs = {
@@ -393,7 +423,8 @@ const RivalsModule = {
                 slugs.forEach(slug => {
                     const paths = clone.querySelectorAll(`.muscle-path[data-muscle="${slug}"]`);
                     paths.forEach(path => {
-                        const rankColor = getColor(currentRankName);
+                        const rankVisuals = getRankVisuals(currentRankName);
+                        const rankColor = rankVisuals.solid;
                         path.style.fill = rankColor;
                         
                         // Add interactivity

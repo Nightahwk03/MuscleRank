@@ -1574,8 +1574,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (baseRank === 'Unranked' || !tierStr) return baseVisuals;
             
             const tier = parseInt(tierStr);
-            // Tier 1: +0.24, Tier 2: +0.12, Tier 3: 0, Tier 4: -0.12, Tier 5: -0.24
-            const percent = (3 - tier) * 0.12;
+            // Adjust color based on tier (1-5)
+            // Tier 3 is base color (0% change). Tier 1 is lighter (+40%), Tier 5 is darker (-40%)
+            const percent = (3 - tier) * 0.20;
             if (percent === 0) return baseVisuals;
             
             const shadeHexColor = (color, percent) => {
