@@ -1,3 +1,21 @@
+// --- Firebase Initialization ---
+const firebaseConfig = {
+  apiKey: "AIzaSyBnQVEBdU5zBxcPfyhwFCRtN0gJCbJwsB4",
+  authDomain: "musclerank-179bf.firebaseapp.com",
+  projectId: "musclerank-179bf",
+  storageBucket: "musclerank-179bf.firebasestorage.app",
+  messagingSenderId: "19417381087",
+  appId: "1:19417381087:web:9c0669827455c22743516a",
+  measurementId: "G-VB259HX1J5"
+};
+
+// Initialize Firebase using V8 compat syntax
+if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+}
+const db = firebase.firestore();
+const auth = firebase.auth();
+
 // --- data.js ---
 const INITIAL_MUSCLES = [
     { id: 'chest', name: 'Chest', xp: 0, rank: 'Wood 1' },
@@ -51,63 +69,72 @@ MAJOR_RANKS.forEach(rank => {
 });
 
 // --- storage.js ---
-const SUPABASE_URL = 'https://zqamwfxcfaeagdgwrfqw.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpxYW13ZnhjZmFlYWdkZ3dyZnF3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMwOTUwMzQsImV4cCI6MjA5ODY3MTAzNH0.rZL2l5QzCa6cK6fKjaEXR_Ni19GTAyoOK52q8DXX91k';
-const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
 const SupabaseModule = {
     currentUser: null,
     syncTimeout: null,
+    
     async checkSession() {
-        const { data } = await supabaseClient.auth.getSession();
-        if (data.session) {
-            this.currentUser = data.session.user;
-            await this.pullData();
-            return true;
-        }
-        return false;
+        return new Promise((resolve) => {
+            auth.onAuthStateChanged(async (user) => {
+                if (user) {
+                    this.currentUser = user;
+                    await this.pullData();
+                    resolve(true);
+                } else {
+                    this.currentUser = null;
+                    resolve(false);
+                }
+            });
+        });
     },
+    
     async login(email, password) {
-        const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-        if (error) throw error;
-        this.currentUser = data.user;
+        const userCred = await auth.signInWithEmailAndPassword(email, password);
+        this.currentUser = userCred.user;
         await this.pullData();
     },
+    
     async register(email, password) {
-        const { data, error } = await supabaseClient.auth.signUp({ email, password });
-        if (error) throw error;
-        this.currentUser = data.user;
+        const userCred = await auth.createUserWithEmailAndPassword(email, password);
+        this.currentUser = userCred.user;
         await this.pushData();
     },
+    
     async logout() {
         if (this.syncTimeout) {
             clearTimeout(this.syncTimeout);
             await this.pushData();
         }
-        await supabaseClient.auth.signOut();
+        await auth.signOut();
         this.currentUser = null;
         localStorage.clear();
         location.reload();
     },
+    
     async pullData() {
         if (!this.currentUser) return;
-        const { data, error } = await supabaseClient.from('user_data').select('data').eq('id', this.currentUser.id).single();
-        if (error && error.code !== 'PGRST116') {
-            console.error('Pull Data Error:', error);
-        }
-        if (data && data.data) {
-            const payload = data.data;
-            for (const key in payload) {
-                if (typeof payload[key] === 'object' && payload[key] !== null) {
-                    localStorage.setItem(key, JSON.stringify(payload[key]));
-                } else {
-                    localStorage.setItem(key, payload[key]);
+        try {
+            const doc = await db.collection('user_data').doc(this.currentUser.uid).get();
+            if (doc.exists) {
+                const payload = doc.data().data;
+                if (payload) {
+                    for (const key in payload) {
+                        if (typeof payload[key] === 'object' && payload[key] !== null) {
+                            localStorage.setItem(key, JSON.stringify(payload[key]));
+                        } else {
+                            localStorage.setItem(key, payload[key]);
+                        }
+                    }
                 }
             }
+        } catch (e) {
+            console.error('Pull Data Error:', e);
         }
     },
+    
     async pushData() {
         if (!this.currentUser) return;
+        
         const payload = {};
         for (let i = 0; i < localStorage.length; i++) {
             const key = localStorage.key(i);
@@ -115,23 +142,27 @@ const SupabaseModule = {
                 payload[key] = localStorage.getItem(key);
             }
         }
+        
         const syncStatus = document.getElementById('cloud-sync-status');
         if (syncStatus) syncStatus.innerHTML = '<span style="color: #bbb;">Syncing...</span>';
 
-        const { error } = await supabaseClient.from('user_data').upsert({
-            id: this.currentUser.id,
-            data: payload
-        });
-        if (error) {
+        try {
+            await db.collection('user_data').doc(this.currentUser.uid).set({
+                id: this.currentUser.uid,
+                data: payload
+            }, { merge: true });
+            
+            if (syncStatus) syncStatus.innerHTML = '<span style="color: #00ff00;">☁️ Saved to Cloud</span>';
+            setTimeout(() => { if (syncStatus) syncStatus.innerHTML = ''; }, 3000);
+        } catch (error) {
             console.error('Push Data Error:', error);
             const errMsg = error.message || JSON.stringify(error);
-            if (syncStatus) syncStatus.innerHTML = '<div style="color: #ff4444; margin-top: 5px; text-align: left; background: rgba(255,0,0,0.1); padding: 5px; border-radius: 4px; font-size: 0.75rem; border: 1px solid #ff4444;">⚠️ Sync Failed:<br>' + errMsg + '</div>';
-        } else {
-            if (syncStatus) syncStatus.innerHTML = '<span style="color: #00ff00;">✅ Saved to Cloud</span>';
-            setTimeout(() => { if (syncStatus) syncStatus.innerHTML = ''; }, 3000);
+            if (syncStatus) syncStatus.innerHTML = '<div style="color: #ff4444; margin-top: 5px; text-align: left; background: rgba(255,0,0,0.1); padding: 5px; border-radius: 4px; font-size: 0.75rem; border: 1px solid #ff4444;">☁️❌ Sync Failed:<br>' + errMsg + '</div>';
         }
     },
+    
     scheduleSync() {
+        if (!this.currentUser) return;
         if (this.syncTimeout) clearTimeout(this.syncTimeout);
         this.syncTimeout = setTimeout(() => {
             this.pushData();
@@ -152,7 +183,7 @@ const Storage = {
     set(key, value) {
         try {
             localStorage.setItem(key, JSON.stringify(value));
-            if (window.supabase) {
+            if (SupabaseModule.currentUser) {
                 SupabaseModule.scheduleSync();
             }
         } catch (e) {
