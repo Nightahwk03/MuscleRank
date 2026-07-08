@@ -1390,6 +1390,12 @@ document.addEventListener('DOMContentLoaded', () => {
             HistoryModule.init();
             DraftModule.init();
 
+            // Reset Bodyweight History
+            Storage.set('mr_bodyweight_history', []);
+            
+            // Re-initialize Settings to update the current weight variable if needed
+            SettingsModule.init();
+
             // Reset Muscles (Ranks & XP)
             // We stringify/parse to deep clone INITIAL_MUSCLES so we don't accidentally mutate the const array
             Storage.set('mr_muscles', JSON.parse(JSON.stringify(INITIAL_MUSCLES)));

@@ -21,7 +21,9 @@ const RivalsModule = {
         const closeCard = document.getElementById('player-card-close');
         if (closeCard) {
             closeCard.addEventListener('click', () => {
-                document.getElementById('player-card-overlay').style.display = 'none';
+                const overlay = document.getElementById('player-card-overlay');
+                overlay.style.display = 'none';
+                overlay.classList.add('hidden');
             });
         }
     },
@@ -85,6 +87,16 @@ const RivalsModule = {
         const myEmail = SupabaseModule.currentUser.email;
 
         try {
+            // Check for existing request or if already friends
+            const existingRef = db.collection('friend_requests');
+            const q1 = await existingRef.where('senderId', '==', myId).where('receiverId', '==', targetId).get();
+            const q2 = await existingRef.where('senderId', '==', targetId).where('receiverId', '==', myId).get();
+            
+            if (!q1.empty || !q2.empty) {
+                document.getElementById('rival-search-results').innerHTML = '<span style="color: #ff4444;">A request already exists or you are already rivals!</span>';
+                return;
+            }
+
             await db.collection('friend_requests').add({
                 senderId: myId,
                 senderEmail: myEmail,
@@ -125,8 +137,8 @@ const RivalsModule = {
                   div.innerHTML = `
                       <div><strong>${req.senderEmail}</strong> wants to be your rival!</div>
                       <div style="display: flex; gap: 8px;">
-                          <button class="btn" style="background: var(--success); color: #fff; padding: 5px 10px; font-size: 0.8rem;" onclick="RivalsModule.acceptRequest('${doc.id}', '${req.senderId}', '${req.senderEmail}')">Accept</button>
-                          <button class="btn" style="background: var(--danger); color: #fff; padding: 5px 10px; font-size: 0.8rem;" onclick="RivalsModule.rejectRequest('${doc.id}')">Reject</button>
+                          <button class="action-btn primary-btn" style="padding: 5px 10px; font-size: 0.8rem; margin: 0;" onclick="RivalsModule.acceptRequest('${doc.id}', '${req.senderId}', '${req.senderEmail}')">Accept</button>
+                          <button class="action-btn danger-btn" style="padding: 5px 10px; font-size: 0.8rem; margin: 0;" onclick="RivalsModule.rejectRequest('${doc.id}')">Reject</button>
                       </div>
                   `;
                   pendingList.appendChild(div);
@@ -196,7 +208,9 @@ const RivalsModule = {
 
     async viewPlayerCard(friendId, friendEmail) {
         document.getElementById('player-card-name').textContent = friendEmail;
-        document.getElementById('player-card-overlay').style.display = 'flex';
+        const overlay = document.getElementById('player-card-overlay');
+        overlay.classList.remove('hidden');
+        overlay.style.display = 'flex';
         
         // Reset fields
         document.getElementById('player-card-bw').textContent = 'Loading...';
