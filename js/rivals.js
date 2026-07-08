@@ -268,6 +268,9 @@ const RivalsModule = {
         overlay.classList.remove('hidden');
         overlay.style.display = 'flex';
         
+        // Define isMe
+        const isMe = (FirebaseModule.currentUser && FirebaseModule.currentUser.uid === friendId);
+
         // Reset fields
         document.getElementById('player-card-bw').textContent = 'Loading...';
         document.getElementById('player-card-last-workout').textContent = 'Loading...';
