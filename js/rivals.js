@@ -121,7 +121,7 @@ const RivalsModule = {
                 return;
             }
             if (friendDoc.exists) {
-                document.getElementById('rival-search-results').innerHTML = '<span style="color: #ff4444;">You are already rivals!</span>';
+                document.getElementById('rival-search-results').innerHTML = '<span style="color: var(--neon-primary);">You are already friends!</span>';
                 return;
             }
 

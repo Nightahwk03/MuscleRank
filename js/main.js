@@ -718,8 +718,82 @@ document.addEventListener('DOMContentLoaded', () => {
     const views = document.querySelectorAll('.view');
     const muscleListEl = document.getElementById('muscle-list');
     
-    // Workout Template DOM
-    const workoutTemplatesView = document.getElementById('workout-templates-view');
+    navBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const target = btn.dataset.target;
+            if (target === 'my-card') return;
+            Storage.set('mr_last_view', target);
+            
+            navBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            
+            const currentActiveView = document.querySelector('.view.active') || document.querySelector('.view[style*="display: block"]');
+            
+            if (currentActiveView) {
+                currentActiveView.style.opacity = '0';
+                setTimeout(() => {
+                    views.forEach(v => {
+                        v.classList.remove('active');
+                        v.style.display = 'none';
+                        v.style.opacity = '0';
+                    });
+                    const targetView = document.getElementById(target);
+                    targetView.classList.add('active');
+                    targetView.style.display = 'block';
+                    // Trigger reflow
+                    void targetView.offsetWidth;
+                    targetView.style.opacity = '1';
+
+                    // Re-render specific modules if needed
+                    if (target === 'analytics') {
+                        AnalyticsModule.renderCharts();
+                    } else if (target === 'exercise-master') {
+                        renderExerciseMaster();
+                    } else if (target === 'workout-master') {
+                        renderWorkoutMaster();
+                    } else if (target === 'record-session') {
+                        renderRecordSession();
+                    } else if (target === 'history') {
+                        HistoryModule.init();
+                    } else if (target === 'statistics') {
+                        renderStatistics();
+                    } else if (target === 'pack-pull') {
+                        renderPackPull();
+                    } else if (target === 'pull-log') {
+                        renderPullLog();
+                    } else if (target === 'social') {
+                        renderSocial();
+                    } else if (target === 'rivals') {
+                        if (typeof RivalsModule !== 'undefined') RivalsModule.init();
+                    } else if (target === 'change-log') {
+                        ChangeLogModule.renderLogs();
+                    } else if (target === 'muscle-rankings') {
+                        renderDashboard();
+                        RankingModule.init();
+                    } else if (target === 'pokeweight') {
+                        if (typeof PokeweightModule !== 'undefined') PokeweightModule.init();
+                    }
+                }, 150); // wait for fade out
+            } else {
+                // Fallback if no active view (e.g. first load)
+                views.forEach(v => {
+                    v.classList.remove('active');
+                    v.style.display = 'none';
+                    v.style.opacity = '0';
+                });
+                const targetView = document.getElementById(target);
+                targetView.classList.add('active');
+                targetView.style.display = 'block';
+                void targetView.offsetWidth;
+                targetView.style.opacity = '1';
+            }
+
+            if (window.innerWidth <= 768) {
+                document.querySelector('.sidebar').classList.remove('open');
+            }
+        });
+    });
+
     const templatesList = document.getElementById('templates-list');
     const createTemplateBtn = document.getElementById('create-template-btn');
     const templateBuilderView = document.getElementById('template-builder-view');
@@ -2657,6 +2731,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const renderPacks = () => {
                 currentOpenedSet = null;
+                Storage.set('mr_sub_view', null);
                 packPullBackBtn.classList.add('hidden');
                 if (packPullRandomBtn) packPullRandomBtn.classList.add('hidden');
                 
@@ -2716,6 +2791,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     
                     card.addEventListener('click', () => {
                         currentOpenedSet = setName;
+                        Storage.set('mr_sub_view', setName);
                         const searchContainer = document.getElementById('pack-search-container');
                         if (searchContainer) searchContainer.style.display = 'none';
                         renderImages(PACK_PULL_DATA[setName] || []);
@@ -2792,8 +2868,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             }
             
-            // Initial render of all packs
-            renderPacks();
+            // Initial render of all packs or saved sub-view
+            const savedSubView = Storage.get('mr_sub_view', null);
+            if (savedSubView && PACK_PULL_DATA[savedSubView]) {
+                currentOpenedSet = savedSubView;
+                const searchContainer = document.getElementById('pack-search-container');
+                if (searchContainer) searchContainer.style.display = 'none';
+                renderImages(PACK_PULL_DATA[savedSubView]);
+            } else {
+                renderPacks();
+            }
             
             // Search logic
             const searchInput = document.getElementById('pack-search-input');
@@ -3224,28 +3308,6 @@ if (toggleResetConfirmBtn && resetConfirmInput) {
 }
 
 // Global Escape Key Binding
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-        const pcOverlay = document.getElementById('player-card-overlay');
-        const pcClose = document.getElementById('player-card-close');
-        if (pcOverlay && pcClose && pcOverlay.style.display !== 'none') pcClose.click();
-        
-        const lbModal = document.getElementById('card-lightbox-modal');
-        const lbClose = document.getElementById('close-lightbox-btn');
-        if (lbModal && lbClose && lbModal.style.display !== 'none') lbClose.click();
-        
-        const plModal = document.getElementById('pull-log-modal');
-        const plClose = document.getElementById('close-pull-log-modal-btn');
-        if (plModal && plClose && !plModal.classList.contains('hidden')) plClose.click();
-        
-        const packView = document.getElementById('pack-open-view');
-        const backBtn = document.getElementById('back-to-packs-btn');
-        if (packView && backBtn && packView.style.display !== 'none') backBtn.click();
-        
-        const ruModal = document.getElementById('rank-up-modal');
-        const ruClose = document.getElementById('close-modal-btn');
-        if (ruModal && ruClose && !ruModal.classList.contains('hidden')) ruClose.click();
-    }
     
     // --- Pokemon Showcase Mechanics ---
     let pendingShowcaseCard = null;
@@ -3299,9 +3361,14 @@ document.addEventListener('keydown', (e) => {
     }
 
     
-    // Global Esc key binding
+    // Global Esc / Backspace key binding
     document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') {
+        if (e.key === 'Escape' || e.key === 'Backspace') {
+            if (e.key === 'Backspace') {
+                const tag = e.target.tagName.toLowerCase();
+                if (tag === 'input' || tag === 'textarea') return;
+            }
+
             // Check modals first
             const lightbox = document.getElementById('lightbox-modal');
             if (lightbox && !lightbox.classList.contains('hidden') && lightbox.style.display !== 'none') {
@@ -3332,10 +3399,9 @@ document.addEventListener('keydown', (e) => {
             }
 
             // Check full screen views
-            const packOpenView = document.getElementById('pack-open-view');
-            if (packOpenView && packOpenView.style.display !== 'none') {
-                const backBtn = document.getElementById('back-to-packs-btn');
-                if (backBtn) backBtn.click();
+            const packPullBackBtn = document.getElementById('pack-pull-back-btn');
+            if (packPullBackBtn && !packPullBackBtn.classList.contains('hidden')) {
+                packPullBackBtn.click();
                 return;
             }
 
