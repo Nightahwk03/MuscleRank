@@ -685,6 +685,34 @@
                             <label for="workout-log-date">Workout Date</label>
                             <input type="date" id="workout-log-date" onclick="this.showPicker()" required style="width: 100%; padding: 0.8rem; background: rgba(0, 0, 0, 0.2); border: 1px solid #2A1642; color: #fff; border-radius: 8px; cursor: pointer;">
                         </div>
+                        <div id="active-workout-exercises" style="display: flex; flex-direction: column; gap: 20px;">
+                            <!-- Exercise sets injected here -->
+                        </div>
+                        <div style="display: flex; gap: 8px; margin-top: 20px;">
+                            <button type="button" id="save-workout-draft-btn" class="action-btn" style="flex: 1; padding: 0.5rem; font-size: 0.85rem; background: var(--bg-card); color: var(--text-secondary); border: 1px solid #2A1642;">Save Draft</button>
+                            <button type="button" id="cancel-workout-log-btn" class="action-btn secondary-btn" style="flex: 1; padding: 0.5rem; font-size: 0.85rem;">Cancel</button>
+                            <button type="submit" class="action-btn primary-btn" style="flex: 1.5; padding: 0.5rem; font-size: 0.85rem;">Complete Workout</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Full-Screen Player Card View -->
+            <section id="my-card" class="view hidden" style="flex-direction: column; overflow-y: auto; height: 100%;">
+                
+                <!-- Header -->
+                <div style="padding: 20px; display: flex; align-items: center; border-bottom: 1px solid var(--border-color); background: rgba(0,0,0,0.2);">
+                    <button class="action-btn" id="player-card-close" style="width: auto; padding: 8px 16px; font-size: 0.9rem; margin: 0; margin-right: 20px; display: flex; align-items: center; gap: 8px; display: none;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                        Back
+                    </button>
+                    <h2 id="player-card-name" style="margin: 0; font-size: 1.1rem; color: var(--neon-primary);">Player Profile</h2>
+                </div>
+                
+                <!-- Main Content Grid -->
+                <div class="player-card-grid" style="padding: 30px; display: grid; grid-template-columns: 300px 1fr 300px; gap: 30px; max-width: 1400px; margin: 0 auto; width: 100%;">
+                    
+                    <!-- Left Column -->
             <div style="display: flex; flex-direction: column; gap: 30px;">
                 <!-- Bodyweight & Recent -->
                 <div class="panel" style="margin: 0;">
