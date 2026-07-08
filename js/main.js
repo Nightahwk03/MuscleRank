@@ -2591,6 +2591,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
+    
     // --- PACK PULL LOGIC ---
     const packPullSetSelect = document.getElementById('pack-pull-set-select');
     const packPullGrid = document.getElementById('pack-pull-grid');
@@ -2621,7 +2622,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 sets.forEach((setName, index) => {
                     const card = document.createElement('div');
                     card.className = 'pokemon-card pack-item stagger-in';
-                    card.style.animationDelay = `${index * 0.03}s`;
+                    card.style.animationDelay = s ;
                     card.dataset.packName = setName;
                     card.style.display = 'flex';
                     card.style.aspectRatio = 'auto';
@@ -2648,20 +2649,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     const logoUrl = (typeof PACK_LOGOS !== 'undefined' && PACK_LOGOS[setName]) ? PACK_LOGOS[setName] : null;
                     if (logoUrl) {
-                        card.innerHTML = `
+                        card.innerHTML = 
                             <div style="display: flex; flex-direction: column; flex: 1;">
                                 <span style="color: var(--neon-primary); font-size: 1rem; font-weight: bold;">${setName}</span>
-                                <span style="color: var(--text-secondary); font-size: 0.8rem; margin-top: 5px;">${uniquePulled} / ${totalCards} Collected</span>
+                                <span style="color: var(--text-secondary); font-size: 0.8rem; margin-top: 5px;">${uniquePulled} /  Collected</span>
                             </div>
                             <img src="${logoUrl}" alt="${setName}" loading="lazy" style="max-height: 45px; max-width: 140px; object-fit: contain;">
-                        `;
+                        ;
                     } else {
-                        card.innerHTML = `
+                        card.innerHTML = 
                             <div style="display: flex; flex-direction: column; flex: 1;">
                                 <h3 style="color: var(--neon-primary); margin: 0; font-size: 1rem;">${setName}</h3>
-                                <span style="color: var(--text-secondary); font-size: 0.8rem; margin-top: 5px;">${uniquePulled} / ${totalCards} Collected</span>
+                                <span style="color: var(--text-secondary); font-size: 0.8rem; margin-top: 5px;">${uniquePulled} /  Collected</span>
                             </div>
-                        `;
+                        ;
                     }
                     
                     card.addEventListener('click', () => {
@@ -2694,7 +2695,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     
                     const cardWrapper = document.createElement('div');
                     cardWrapper.className = 'stagger-in';
-                    cardWrapper.style.animationDelay = `${index * 0.05}s`;
+                    cardWrapper.style.animationDelay = s ;
                     cardWrapper.style.display = 'flex';
                     cardWrapper.style.flexDirection = 'column';
                     cardWrapper.style.alignItems = 'center';
@@ -2707,24 +2708,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                     });
                     
-                    const btn = document.createElement('button');
-                    btn.className = 'action-btn secondary-btn';
-                    btn.style.marginTop = '10px';
-                    btn.style.fontSize = '0.8rem';
-                    btn.style.width = 'auto';
-                    btn.style.padding = '5px 10px';
-                    btn.textContent = 'Set on Display';
-                    btn.onclick = (e) => {
-                        e.stopPropagation();
-                        const isShiny = imgPath.includes('Shiny Pokemon');
-                        // Extract filename from path
-                        const parts = imgPath.split('/');
-                        const sprite = parts[parts.length - 1];
-                        window.attemptSetShowcase(sprite, isShiny);
-                    };
-                    
                     cardWrapper.appendChild(img);
-                    cardWrapper.appendChild(btn);
                     
                     packPullGrid.appendChild(cardWrapper);
                 });
@@ -2795,7 +2779,7 @@ document.addEventListener('DOMContentLoaded', () => {
             };
             this.logs.unshift(pullData); // Add to beginning
             Storage.set('mr_pull_logs', this.logs);
-            ChangeLogModule.log('create', `Pulled ${cards.length} cards from ${packName}.`);
+            ChangeLogModule.log('create', Pulled ${cards.length} cards from ${packName}.);
         },
         getAllLogs() {
             return this.logs;
@@ -2830,10 +2814,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const pName = log.packName || 'Random Pull';
             const logoUrl = (typeof PACK_LOGOS !== 'undefined' && PACK_LOGOS[pName]) ? PACK_LOGOS[pName] : null;
             const titleHtml = logoUrl 
-                ? `<div style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;"><img src="${logoUrl}" style="height: 24px; object-fit: contain;"> <h3 style="color: var(--neon-primary); margin: 0;">${pName}</h3></div>`
-                : `<h3 style="color: var(--neon-primary); margin: 0 0 5px 0;">${pName}</h3>`;
+                ? <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;"><img src="${logoUrl}" style="height: 24px; object-fit: contain;"> <h3 style="color: var(--neon-primary); margin: 0;">${pName}</h3></div>
+                : <h3 style="color: var(--neon-primary); margin: 0 0 5px 0;">${pName}</h3>;
 
-            card.innerHTML = `
+            card.innerHTML = 
                 <div>
                     ${titleHtml}
                     <p style="margin: 0; color: var(--text-secondary); font-size: 0.9rem;">${dateStr} at ${timeStr}</p>
@@ -2841,7 +2825,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div>
                     <span style="background: rgba(255,255,255,0.1); padding: 5px 10px; border-radius: 4px; font-weight: bold;">${log.cards.length} Cards</span>
                 </div>
-            `;
+            ;
             
             card.addEventListener('click', () => {
                 const modal = document.getElementById('pull-log-modal');
@@ -2877,7 +2861,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         e.stopPropagation(); // prevent opening lightbox
                         const sprite = typeof cardData === 'string' ? cardData : cardData.image;
                         const isShiny = typeof cardData === 'object' && cardData.isShiny;
-                        window.attemptSetShowcase(sprite, isShiny);
+                        if (window.attemptSetShowcase) window.attemptSetShowcase(sprite, isShiny);
                     };
                     
                     const c = document.createElement('div');
@@ -2896,63 +2880,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    const closePullLogModalBtn = document.getElementById('close-pull-log-modal-btn');
-    if (closePullLogModalBtn) {
-        closePullLogModalBtn.addEventListener('click', () => {
-            document.getElementById('pull-log-modal').classList.add('hidden');
-        });
-    }
-
-    // --- POKEWEIGHT LOGIC ---
-    let pokeweightDataFetched = false;
     function renderPokeweight() {
-        if (pokeweightDataFetched) return; // Prevent re-fetching if already loaded
-        
-        const tbody = document.getElementById('pokeweight-table-body');
-        const searchInput = document.getElementById('pokeweight-search');
-        
-        const renderTable = (filterText = '') => {
-            tbody.innerHTML = ''; // Clear existing data if any
-            
-            if (typeof POKEWEIGHT_DATA === 'undefined') {
-                tbody.innerHTML = '<tr><td colspan="3" style="text-align: center; color: var(--neon-danger); padding: 20px;">Failed to load data. Please ensure pokeweight-data.js exists.</td></tr>';
-                return;
-            }
-
-            const lowerFilter = filterText.toLowerCase();
-            const filteredData = POKEWEIGHT_DATA.filter(p => p.name.toLowerCase().includes(lowerFilter));
-
-            if (filteredData.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="3" style="text-align: center; color: var(--text-secondary); padding: 20px;">No Pokemon found matching your search.</td></tr>';
-                return;
-            }
-
-            filteredData.forEach((pokemon, index) => {
-                const tr = document.createElement('tr');
-                // Alternate row background colors for better readability
-                tr.style.background = index % 2 === 0 ? 'rgba(0,0,0,0.2)' : 'rgba(0,0,0,0.4)';
-                tr.style.borderBottom = '1px solid rgba(255,255,255,0.05)';
-                
-                tr.innerHTML = `
-                    <td style="padding: 12px 15px; color: var(--text-primary); font-weight: bold;">${pokemon.name}</td>
-                    <td style="padding: 12px 15px; color: var(--text-secondary);">${pokemon.kgs} kg</td>
-                    <td style="padding: 12px 15px; color: var(--text-secondary);">${pokemon.lbs} lbs</td>
-                `;
-                tbody.appendChild(tr);
-            });
-        };
-
-        // Attach search listener
-        if (searchInput) {
-            searchInput.addEventListener('input', (e) => {
-                renderTable(e.target.value);
-            });
-        }
-
-        // Initial render
-        renderTable();
-        pokeweightDataFetched = true;
-    }
 
     // --- LIGHTBOX LOGIC ---
     const lightboxModal = document.getElementById('card-lightbox-modal');
@@ -3240,7 +3168,7 @@ document.addEventListener('keydown', (e) => {
         if (currentShowcase.length < 3) {
             ShowcaseModule.setDisplay(url);
             alert("Card added to showcase!");
-            renderPlayerCardShowcase && typeof renderPlayerCardShowcase === 'function' && renderPlayerCardShowcase();
+            if (window.renderPlayerCardShowcase) window.renderPlayerCardShowcase();
         } else {
             pendingShowcaseCard = url;
             const modal = document.getElementById('showcase-replace-modal');
@@ -3264,7 +3192,7 @@ document.addEventListener('keydown', (e) => {
                         modal.classList.add('hidden');
                         alert("Showcase card replaced!");
                         pendingShowcaseCard = null;
-                        renderPlayerCardShowcase && typeof renderPlayerCardShowcase === 'function' && renderPlayerCardShowcase();
+                        if (window.renderPlayerCardShowcase) window.renderPlayerCardShowcase();
                     };
                     grid.appendChild(img);
                 });
@@ -3330,4 +3258,5 @@ document.addEventListener('keydown', (e) => {
     });
 
 });
+
 

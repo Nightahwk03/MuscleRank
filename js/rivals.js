@@ -42,7 +42,7 @@ const RivalsModule = {
             myCardBtn.addEventListener('click', () => {
                 const user = auth.currentUser;
                 if (user) {
-                    window.openPlayerCard(user.uid, user.email);
+                    RivalsModule.viewPlayerCard(user.uid, user.email);
                 } else {
                     alert("You must be logged in to view your card.");
                 }
