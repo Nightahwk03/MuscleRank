@@ -307,8 +307,8 @@ const RivalsModule = {
             }
 
             // Extract Last Workout
-            if (data.mr_workout_log) {
-                const log = JSON.parse(data.mr_workout_log);
+            if (data.mr_history) {
+                const log = JSON.parse(data.mr_history);
                 if (log.length > 0) {
                     const last = log[0];
                     const date = new Date(last.date).toLocaleDateString();
@@ -325,8 +325,8 @@ const RivalsModule = {
             }
 
             // Top Lifts
-            if (data.mr_workout_log) {
-                const log = JSON.parse(data.mr_workout_log);
+            if (data.mr_history) {
+                const log = JSON.parse(data.mr_history);
                 this.calculateRivalTopLifts(log);
             }
 
@@ -343,7 +343,7 @@ const RivalsModule = {
         if (existingGraph) {
             const clone = existingGraph.cloneNode(true);
             clone.style.width = '100%';
-            clone.style.maxWidth = '300px';
+            clone.style.maxWidth = '600px';
             clone.style.height = 'auto';
             clone.style.display = 'block';
             clone.style.margin = '0 auto';

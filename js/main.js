@@ -2894,36 +2894,30 @@ document.addEventListener('DOMContentLoaded', () => {
         if (pokeweightDataFetched) return; // Prevent re-fetching if already loaded
         
         const tbody = document.getElementById('pokeweight-table-body');
-        tbody.innerHTML = '<tr><td colspan="2" style="text-align: center; padding: 20px;">Loading data...</td></tr>';
+        tbody.innerHTML = '';
         
-        fetch('pokemon.json')
-            .then(response => {
-                if (!response.ok) throw new Error('Network response was not ok');
-                return response.json();
-            })
-            .then(data => {
-                tbody.innerHTML = ''; // Clear loading text
+        try {
+            if (typeof POKEWEIGHT_DATA === 'undefined') {
+                throw new Error("POKEWEIGHT_DATA not found in pokeweight-data.js");
+            }
+            
+            POKEWEIGHT_DATA.forEach((pokemon, index) => {
+                const tr = document.createElement('tr');
+                // Alternate row background colors for better readability
+                tr.style.background = index % 2 === 0 ? 'rgba(0,0,0,0.2)' : 'rgba(0,0,0,0.4)';
+                tr.style.borderBottom = '1px solid rgba(255,255,255,0.05)';
                 
-                data.forEach((pokemon, index) => {
-                    const tr = document.createElement('tr');
-                    // Alternate row background colors for better readability
-                    tr.style.background = index % 2 === 0 ? 'rgba(0,0,0,0.2)' : 'rgba(0,0,0,0.4)';
-                    tr.style.borderBottom = '1px solid rgba(255,255,255,0.05)';
-                    
-                    const weightKg = (pokemon.weight / 10).toFixed(1); // Standard PokeAPI weight is in hectograms (1/10th of a kg)
-                    
-                    tr.innerHTML = `
-                        <td style="padding: 12px 15px; color: var(--text-primary); font-weight: bold;">${pokemon.name}</td>
-                        <td style="padding: 12px 15px; color: var(--text-secondary);">${weightKg} kg</td>
-                    `;
-                    tbody.appendChild(tr);
-                });
-                pokeweightDataFetched = true;
-            })
-            .catch(error => {
-                console.error('Error fetching pokemon.json:', error);
-                tbody.innerHTML = '<tr><td colspan="2" style="text-align: center; color: var(--neon-danger); padding: 20px;">Failed to load data. Please ensure pokemon.json exists and is accessible.</td></tr>';
+                tr.innerHTML = `
+                    <td style="padding: 12px 15px; color: var(--text-primary); font-weight: bold;">${pokemon.name}</td>
+                    <td style="padding: 12px 15px; color: var(--text-secondary);">${pokemon.kgs} kg</td>
+                `;
+                tbody.appendChild(tr);
             });
+            pokeweightDataFetched = true;
+        } catch (error) {
+            console.error('Error loading pokeweight data:', error);
+            tbody.innerHTML = '<tr><td colspan="2" style="text-align: center; color: var(--neon-danger); padding: 20px;">Failed to load data. Ensure pokeweight-data.js is loaded.</td></tr>';
+        }
     }
 
     // --- LIGHTBOX LOGIC ---
