@@ -312,7 +312,7 @@ const RivalsModule = {
                 if (log.length > 0) {
                     const last = log[0];
                     const date = new Date(last.date).toLocaleDateString();
-                    document.getElementById('player-card-last-workout').textContent = last.routineName + ' (' + date + ')';
+                    document.getElementById('player-card-last-workout').textContent = (last.name || 'Workout') + ' (' + date + ')';
                 } else {
                     document.getElementById('player-card-last-workout').textContent = 'None';
                 }
@@ -402,8 +402,8 @@ const RivalsModule = {
                 if (!ex.sets) return;
                 ex.sets.forEach(set => {
                     if (set.reps > 0 && set.weight > 0) {
-                        if (!bestLifts[ex.exerciseId] || bestLifts[ex.exerciseId].weight < set.weight) {
-                            bestLifts[ex.exerciseId] = { weight: set.weight, reps: set.reps, name: ex.name || ex.exerciseId };
+                        if (!bestLifts[ex.id] || bestLifts[ex.id].weight < set.weight) {
+                            bestLifts[ex.id] = { weight: set.weight, reps: set.reps, name: ex.name || ex.id };
                         }
                     }
                 });
@@ -445,10 +445,15 @@ const RivalsModule = {
         container.style.flexWrap = 'wrap';
 
         urls.forEach(url => {
+            const cardWrap = document.createElement('div');
+            const isShiny = url.includes('Shiny');
+            const borderColor = isShiny ? '#FFD700' : 'var(--neon-primary)';
+            cardWrap.style.cssText = `width: 100px; height: 140px; border: 2px solid ${borderColor}; border-radius: 8px; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.3); box-shadow: 0 0 10px ${borderColor}80; overflow: hidden;`;
             const img = document.createElement('img');
             img.src = url;
-            img.style.cssText = 'width: 100px; height: 140px; object-fit: contain; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.3); background: rgba(0,0,0,0.2);';
-            container.appendChild(img);
+            img.style.cssText = 'width: 100%; height: 100%; object-fit: contain;';
+            cardWrap.appendChild(img);
+            container.appendChild(cardWrap);
         });
     }
 };
@@ -456,4 +461,3 @@ const RivalsModule = {
 document.addEventListener('DOMContentLoaded', () => {
     RivalsModule.init();
 });
-
