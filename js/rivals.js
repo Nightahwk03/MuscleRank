@@ -104,6 +104,7 @@ const RivalsModule = {
                 status: 'pending',
                 timestamp: firebase.firestore.FieldValue.serverTimestamp()
             });
+            ChangeLogModule.log('social', `Sent a rival request to ${targetEmail}`);
             document.getElementById('rival-search-results').innerHTML = '<span style="color: #00ff00;">Rival Request Sent!</span>';
         } catch (error) {
             console.error('Request error:', error);
@@ -158,6 +159,7 @@ const RivalsModule = {
             await db.collection('user_profiles').doc(senderId)
                     .collection('friends').doc(SupabaseModule.currentUser.uid).set({ email: SupabaseModule.currentUser.email, addedAt: firebase.firestore.FieldValue.serverTimestamp() });
 
+            ChangeLogModule.log('social', `Accepted rival request from ${senderEmail}`);
             this.loadFriends();
         } catch (e) {
             console.error('Accept error:', e);
@@ -167,8 +169,29 @@ const RivalsModule = {
     async rejectRequest(requestId) {
         try {
             await db.collection('friend_requests').doc(requestId).delete();
+            ChangeLogModule.log('social', `Rejected a rival request.`);
         } catch (e) {
             console.error('Reject error:', e);
+        }
+    },
+
+    async removeRival(friendId, friendEmail) {
+        if (!SupabaseModule.currentUser) return;
+        const confirmRemove = confirm(`Are you sure you want to remove ${friendEmail} as a rival?`);
+        if (!confirmRemove) return;
+
+        try {
+            // Remove from my friends
+            await db.collection('user_profiles').doc(SupabaseModule.currentUser.uid)
+                    .collection('friends').doc(friendId).delete();
+            
+            // Remove me from their friends
+            await db.collection('user_profiles').doc(friendId)
+                    .collection('friends').doc(SupabaseModule.currentUser.uid).delete();
+
+            ChangeLogModule.log('social', `Removed ${friendEmail} from your rivals list.`);
+        } catch (e) {
+            console.error('Remove rival error:', e);
         }
     },
 
@@ -192,8 +215,13 @@ const RivalsModule = {
                   const card = document.createElement('div');
                   card.style.cssText = 'background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 15px; cursor: pointer; transition: transform 0.2s, background 0.2s;';
                   card.innerHTML = `
-                      <div style="font-weight: 700; font-size: 1.1rem; color: var(--neon-primary); margin-bottom: 10px;">${friend.email}</div>
-                      <div style="font-size: 0.8rem; color: var(--text-secondary);">Tap to view Player Card</div>
+                      <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                          <div>
+                              <div style="font-weight: 700; font-size: 1.1rem; color: var(--neon-primary); margin-bottom: 5px;">${friend.email}</div>
+                              <div style="font-size: 0.8rem; color: var(--text-secondary);">Tap to view Player Card</div>
+                          </div>
+                          <button class="action-btn danger-btn" style="padding: 4px 8px; font-size: 0.75rem; margin: 0;" onclick="event.stopPropagation(); RivalsModule.removeRival('${friendId}', '${friend.email}')">Unrival</button>
+                      </div>
                   `;
                   
                   card.onmouseover = () => card.style.background = 'rgba(255,255,255,0.1)';
