@@ -1172,3 +1172,13 @@ input:-webkit-autofill:active {
     }
 }
 .change-log-entry.social { border-left-color: var(--neon-primary); }
+
+/* Player Card Responsive Grid */
+@media (max-width: 900px) {
+    .player-card-grid {
+        grid-template-columns: 1fr !important;
+    }
+    .player-card-grid > div {
+        width: 100%;
+    }
+}
