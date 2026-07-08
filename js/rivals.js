@@ -555,8 +555,10 @@ const RivalsModule = {
         container.style.display = 'flex';
         container.style.justifyContent = 'center';
         container.style.gap = '25px';
-        container.style.flexWrap = 'wrap';
+        container.style.flexWrap = 'nowrap';
+        container.style.overflowX = 'auto';
         container.style.padding = '20px';
+        container.style.maxWidth = '100%';
 
         urls.forEach((url, index) => {
             const cardWrap = document.createElement('div');
