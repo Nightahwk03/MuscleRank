@@ -512,6 +512,12 @@ const RivalsModule = {
         logs.forEach(session => {
             if (!session.exercises) return;
             session.exercises.forEach(ex => {
+                // Ignore bodyweight exercises for top 3 lifts
+                if (typeof ExerciseModule !== 'undefined') {
+                    const dbEx = ExerciseModule.getExerciseById(ex.id);
+                    if (dbEx && dbEx.isBodyweight) return;
+                }
+                
                 if (!ex.sets) return;
                 ex.sets.forEach(set => {
                     if (set.reps > 0 && set.weight > 0) {
