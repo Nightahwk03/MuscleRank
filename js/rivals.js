@@ -381,10 +381,19 @@ const RivalsModule = {
 
             muscles.forEach(m => {
                 const slugs = muscleToSlugs[m.id] || [];
+                
+                // Dynamically calculate the rank from XP, falling back to m.rank or Wood 1 if XP is somehow missing
+                let currentRankName = 'Wood 1';
+                if (typeof m.xp === 'number' && typeof RankingModule !== 'undefined') {
+                    currentRankName = RankingModule.getRankForXP(m.xp).name;
+                } else if (m.rank) {
+                    currentRankName = m.rank;
+                }
+                
                 slugs.forEach(slug => {
                     const paths = clone.querySelectorAll(`.muscle-path[data-muscle="${slug}"]`);
                     paths.forEach(path => {
-                        const rankColor = getColor(m.rank);
+                        const rankColor = getColor(currentRankName);
                         path.style.fill = rankColor;
                         
                         // Add interactivity
@@ -392,7 +401,7 @@ const RivalsModule = {
                         path.style.transition = 'filter 0.2s';
                         
                         // Lowered drop shadow slightly because the paths are tightly packed
-                        if (m.rank !== 'Unranked') {
+                        if (currentRankName.indexOf('Unranked') === -1) {
                             path.style.filter = `drop-shadow(0 0 3px ${rankColor})`;
                         } else {
                             path.style.filter = 'none';
@@ -401,7 +410,7 @@ const RivalsModule = {
                         path.addEventListener('mousemove', (e) => {
                             path.style.filter = 'brightness(1.5)';
                             if (tooltip) {
-                                tooltip.innerHTML = `<strong>${m.name}</strong><br><span style="color:${rankColor}">${m.rank}</span>`;
+                                tooltip.innerHTML = `<strong>${m.name}</strong><br><span style="color:${rankColor}">${currentRankName}</span>`;
                                 tooltip.style.opacity = '1';
                                 tooltip.classList.remove('hidden');
                                 tooltip.style.left = e.pageX + 'px';
@@ -410,7 +419,7 @@ const RivalsModule = {
                         });
                         
                         path.addEventListener('mouseleave', () => {
-                            if (m.rank !== 'Unranked') {
+                            if (currentRankName.indexOf('Unranked') === -1) {
                                 path.style.filter = `drop-shadow(0 0 3px ${rankColor})`;
                             } else {
                                 path.style.filter = 'none';
