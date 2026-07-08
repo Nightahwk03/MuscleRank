@@ -2910,16 +2910,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 tr.style.background = index % 2 === 0 ? 'rgba(0,0,0,0.2)' : 'rgba(0,0,0,0.4)';
                 tr.style.borderBottom = '1px solid rgba(255,255,255,0.05)';
                 
+                const weightLbs = pokemon.lbs || (parseFloat(pokemon.kgs) * 2.20462).toFixed(1);
+                
                 tr.innerHTML = `
                     <td style="padding: 12px 15px; color: var(--text-primary); font-weight: bold;">${pokemon.name}</td>
                     <td style="padding: 12px 15px; color: var(--text-secondary);">${pokemon.kgs} kg</td>
+                    <td style="padding: 12px 15px; color: var(--text-secondary);">${weightLbs} lbs</td>
                 `;
                 tbody.appendChild(tr);
             });
             pokeweightDataFetched = true;
         } catch (error) {
             console.error('Error loading pokeweight data:', error);
-            tbody.innerHTML = '<tr><td colspan="2" style="text-align: center; color: var(--neon-danger); padding: 20px;">Failed to load data. Ensure pokeweight-data.js is loaded.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="3" style="text-align: center; color: var(--neon-danger); padding: 20px;">Failed to load data. Ensure pokeweight-data.js is loaded.</td></tr>';
         }
     }
 
