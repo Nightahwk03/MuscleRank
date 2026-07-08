@@ -2592,7 +2592,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     
-            // --- PACK PULL LOGIC ---
+            
+    // --- PACK PULL LOGIC ---
     const packPullSetSelect = document.getElementById('pack-pull-set-select');
     const packPullGrid = document.getElementById('pack-pull-grid');
     let packPullPopulated = false;
@@ -3258,6 +3259,7 @@ document.addEventListener('keydown', (e) => {
     });
 
 });
+
 
 
 
