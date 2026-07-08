@@ -279,24 +279,39 @@ const RivalsModule = {
         document.getElementById('player-card-perfect-weeks').textContent = '--';
 
         try {
-            const [doc, profileDoc] = await Promise.all([
-                db.collection('user_data').doc(friendId).get(),
-                db.collection('user_profiles').doc(friendId).get()
-            ]);
+            let data, profileData;
             
-            if (!doc.exists) {
-                document.getElementById('player-card-bw').textContent = 'No Data';
-                document.getElementById('player-card-last-workout').textContent = 'No Data';
-                return;
+            if (isMe) {
+                data = {
+                    mr_bodyweight_history: localStorage.getItem('mr_bodyweight_history'),
+                    mr_history: localStorage.getItem('mr_history'),
+                    mr_settings: localStorage.getItem('mr_settings'),
+                    mr_muscles: localStorage.getItem('mr_muscles')
+                };
+                profileData = {
+                    mr_pokemon: localStorage.getItem('mr_pokemon')
+                };
+            } else {
+                const [doc, profileDoc] = await Promise.all([
+                    db.collection('user_data').doc(friendId).get(),
+                    db.collection('user_profiles').doc(friendId).get()
+                ]);
+                
+                if (!doc.exists) {
+                    document.getElementById('player-card-bw').textContent = 'No Data';
+                    document.getElementById('player-card-last-workout').textContent = 'No Data';
+                    return;
+                }
+                
+                data = doc.data().data || {};
+                profileData = profileDoc.exists ? profileDoc.data() : {};
             }
 
-            const data = doc.data().data || {};
-
             // Pinned Cards (fetch from user_profiles)
-            if (profileDoc.exists && profileDoc.data().mr_pokemon) {
+            if (profileData && profileData.mr_pokemon) {
                 let showcaseUrls = [];
                 try {
-                    showcaseUrls = JSON.parse(profileDoc.data().mr_pokemon);
+                    showcaseUrls = JSON.parse(profileData.mr_pokemon);
                 } catch(e) {}
                 this.renderRivalShowcase(showcaseUrls, isMe);
             }
