@@ -213,7 +213,7 @@ const Storage = {
     set(key, value) {
         try {
             localStorage.setItem(key, JSON.stringify(value));
-            if (FirebaseModule.currentUser) {
+            if (FirebaseModule.currentUser && key.startsWith('mr_')) {
                 FirebaseModule.scheduleSync();
             }
         } catch (e) {
@@ -766,7 +766,7 @@ document.addEventListener('DOMContentLoaded', () => {
     navBtns.forEach(btn => {
         btn.addEventListener('click', () => {
             const target = btn.dataset.target;
-            Storage.set('mr_last_view', target);
+            Storage.set('local_last_view', target);
             
             navBtns.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
@@ -2648,7 +2648,7 @@ document.addEventListener('DOMContentLoaded', () => {
     StreakEngine.evaluate();
     
     // Restore last active view
-    const lastView = Storage.get('mr_last_view', 'muscle-rankings');
+    const lastView = Storage.get('local_last_view', 'muscle-rankings');
     const targetBtn = document.querySelector(`.nav-btn[data-target="${lastView}"]`);
     if (targetBtn) {
         targetBtn.click();
@@ -2678,7 +2678,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const renderPacks = () => {
                 currentOpenedSet = null;
-                Storage.set('mr_sub_view', null);
+                Storage.set('local_sub_view', null);
                 packPullBackBtn.classList.add('hidden');
                 if (packPullRandomBtn) packPullRandomBtn.classList.add('hidden');
                 
@@ -3087,7 +3087,7 @@ FirebaseModule.checkSession().then(isLoggedIn => {
         document.getElementById('auth-overlay').style.display = 'none';
         
         // Ensure "My Card" triggers immediately on refresh once Auth is ready
-        const lastView = Storage.get('mr_last_view', 'muscle-rankings');
+        const lastView = Storage.get('local_last_view', 'muscle-rankings');
         if (lastView === 'my-card' && FirebaseModule.currentUser) {
             RivalsModule.viewPlayerCard(FirebaseModule.currentUser.uid, FirebaseModule.currentUser.email);
         }
