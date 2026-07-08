@@ -1171,3 +1171,4 @@ input:-webkit-autofill:active {
         max-height: 85dvh;
     }
 }
+.change-log-entry.social { border-left-color: var(--neon-primary); }
