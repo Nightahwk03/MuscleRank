@@ -358,35 +358,67 @@ const RivalsModule = {
                 const base = rankStr.split(' ')[0];
                 return rankColors[base] || '#333';
             };
+            
+            const muscleToSlugs = {
+                'chest': ['chest'],
+                'biceps': ['biceps'],
+                'triceps': ['triceps'],
+                'shoulders': ['deltoids'],
+                'lats': ['lats'],
+                'quads': ['quadriceps'],
+                'hamstrings': ['hamstring'],
+                'calves': ['calves'],
+                'core': ['abs', 'obliques'],
+                'forearms': ['forearm'],
+                'traps': ['traps'],
+                'glutes': ['glutes']
+            };
 
             const tooltip = document.getElementById('muscle-tooltip');
 
             muscles.forEach(m => {
-                const path = clone.querySelector(`[data-id="${m.id}"]`);
-                if (path) {
-                    path.style.fill = getColor(m.rank);
-                    
-                    // Add interactivity
-                    path.style.cursor = 'pointer';
-                    path.style.transition = 'filter 0.2s';
-                    
-                    path.addEventListener('mousemove', (e) => {
-                        path.style.filter = 'brightness(1.5)';
-                        if (tooltip) {
-                            tooltip.textContent = `${m.name}: ${m.rank}`;
-                            tooltip.classList.remove('hidden');
-                            tooltip.style.left = e.pageX + 'px';
-                            tooltip.style.top = e.pageY + 'px';
+                const slugs = muscleToSlugs[m.id] || [];
+                slugs.forEach(slug => {
+                    const paths = clone.querySelectorAll(`.muscle-path[data-muscle="${slug}"]`);
+                    paths.forEach(path => {
+                        const rankColor = getColor(m.rank);
+                        path.style.fill = rankColor;
+                        
+                        // Add interactivity
+                        path.style.cursor = 'pointer';
+                        path.style.transition = 'filter 0.2s';
+                        
+                        // Lowered drop shadow slightly because the paths are tightly packed
+                        if (m.rank !== 'Unranked') {
+                            path.style.filter = `drop-shadow(0 0 3px ${rankColor})`;
+                        } else {
+                            path.style.filter = 'none';
                         }
+                        
+                        path.addEventListener('mousemove', (e) => {
+                            path.style.filter = 'brightness(1.5)';
+                            if (tooltip) {
+                                tooltip.innerHTML = `<strong>${m.name}</strong><br><span style="color:${rankColor}">${m.rank}</span>`;
+                                tooltip.style.opacity = '1';
+                                tooltip.classList.remove('hidden');
+                                tooltip.style.left = e.pageX + 'px';
+                                tooltip.style.top = (e.pageY - 40) + 'px';
+                            }
+                        });
+                        
+                        path.addEventListener('mouseleave', () => {
+                            if (m.rank !== 'Unranked') {
+                                path.style.filter = `drop-shadow(0 0 3px ${rankColor})`;
+                            } else {
+                                path.style.filter = 'none';
+                            }
+                            if (tooltip) {
+                                tooltip.style.opacity = '0';
+                                setTimeout(() => tooltip.classList.add('hidden'), 200);
+                            }
+                        });
                     });
-                    
-                    path.addEventListener('mouseleave', () => {
-                        path.style.filter = 'none';
-                        if (tooltip) {
-                            tooltip.classList.add('hidden');
-                        }
-                    });
-                }
+                });
             });
 
             container.innerHTML = '';
@@ -441,17 +473,39 @@ const RivalsModule = {
         container.innerHTML = '';
         container.style.display = 'flex';
         container.style.justifyContent = 'center';
-        container.style.gap = '15px';
+        container.style.gap = '25px';
         container.style.flexWrap = 'wrap';
+        container.style.padding = '20px';
 
         urls.forEach(url => {
             const cardWrap = document.createElement('div');
             const isShiny = url.includes('Shiny');
             const borderColor = isShiny ? '#FFD700' : 'var(--neon-primary)';
-            cardWrap.style.cssText = `width: 100px; height: 140px; border: 2px solid ${borderColor}; border-radius: 8px; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.3); box-shadow: 0 0 10px ${borderColor}80; overflow: hidden;`;
+            
+            // The "square" holder design requested
+            cardWrap.style.cssText = `
+                width: 220px; 
+                height: 220px; 
+                border: 2px solid ${borderColor}; 
+                border-radius: 12px; 
+                display: flex; 
+                align-items: center; 
+                justify-content: center; 
+                background: linear-gradient(135deg, rgba(0,0,0,0.6) 0%, rgba(20,10,35,0.8) 100%); 
+                box-shadow: inset 0 0 15px rgba(0,0,0,0.8), 0 0 12px ${borderColor}60; 
+                position: relative;
+                overflow: hidden;
+            `;
+            
             const img = document.createElement('img');
             img.src = url;
-            img.style.cssText = 'width: 100%; height: 100%; object-fit: contain;';
+            // Aspect ratio 1:1.4 (roughly 140px width to 196px height)
+            img.style.cssText = 'width: 140px; height: 196px; object-fit: contain; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.5)); transition: transform 0.3s ease;';
+            
+            // Hover effect for the card itself
+            cardWrap.onmouseover = () => img.style.transform = 'scale(1.1) translateY(-5px)';
+            cardWrap.onmouseout = () => img.style.transform = 'scale(1) translateY(0)';
+            
             cardWrap.appendChild(img);
             container.appendChild(cardWrap);
         });
