@@ -274,6 +274,7 @@ const RivalsModule = {
         document.getElementById('player-card-top-lifts').innerHTML = '';
         document.getElementById('player-card-showcase').innerHTML = '';
         document.getElementById('player-card-bodygraph').innerHTML = '';
+        document.getElementById('player-card-perfect-weeks').textContent = '--';
 
         try {
             const [doc, profileDoc] = await Promise.all([
@@ -307,16 +308,38 @@ const RivalsModule = {
             }
 
             // Extract Last Workout
+            let historyLog = [];
             if (data.mr_history) {
-                const log = JSON.parse(data.mr_history);
-                if (log.length > 0) {
-                    const last = log[0];
+                historyLog = JSON.parse(data.mr_history);
+                if (historyLog.length > 0) {
+                    const last = historyLog[0];
                     const date = new Date(last.date).toLocaleDateString();
                     document.getElementById('player-card-last-workout').textContent = (last.name || 'Workout') + ' (' + date + ')';
                 } else {
                     document.getElementById('player-card-last-workout').textContent = 'None';
                 }
             }
+
+            // Calculate Perfect Weeks
+            let perfectWeeks = 0;
+            if (data.mr_settings && historyLog.length > 0) {
+                try {
+                    const settings = JSON.parse(data.mr_settings);
+                    const weeklyGoal = settings.weeklyGoal || 5;
+                    const weekMap = {};
+                    historyLog.forEach(h => {
+                        if (typeof StreakEngine !== 'undefined') {
+                            const weekStr = StreakEngine.getStartOfWeek(h.date).toISOString();
+                            if (!weekMap[weekStr]) weekMap[weekStr] = 0;
+                            weekMap[weekStr]++;
+                        }
+                    });
+                    for (const w in weekMap) {
+                        if (weekMap[w] >= weeklyGoal) perfectWeeks++;
+                    }
+                } catch(e) { console.error('Error calculating perfect weeks', e); }
+            }
+            document.getElementById('player-card-perfect-weeks').textContent = perfectWeeks;
 
             // Bodygraph
             if (data.mr_muscles) {
