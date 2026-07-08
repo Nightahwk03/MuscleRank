@@ -565,8 +565,8 @@ const RivalsModule = {
             
             // The "square" holder design requested
             cardWrap.style.cssText = `
-                width: 220px; 
-                height: 220px; 
+                width: 180px; 
+                height: 200px; 
                 border: 2px solid ${borderColor}; 
                 border-radius: 12px; 
                 display: flex; 
@@ -580,8 +580,8 @@ const RivalsModule = {
             
             const img = document.createElement('img');
             img.src = url;
-            // Aspect ratio 1:1.4 (roughly 140px width to 196px height)
-            img.style.cssText = 'width: 140px; height: 196px; object-fit: contain; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.5)); transition: transform 0.3s ease;';
+            // Aspect ratio 1:1.4
+            img.style.cssText = 'width: 120px; height: 168px; object-fit: contain; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.5)); transition: transform 0.3s ease;';
             
             // Hover effect for the card itself
             cardWrap.onmouseover = () => {
@@ -607,39 +607,36 @@ const RivalsModule = {
             itemContainer.appendChild(cardWrap);
 
             if (isMe) {
-                const controlsContainer = document.createElement('div');
-                controlsContainer.style.display = 'flex';
-                controlsContainer.style.gap = '10px';
+                itemContainer.draggable = true;
+                itemContainer.style.cursor = 'grab';
                 
-                if (index > 0) {
-                    const leftBtn = document.createElement('button');
-                    leftBtn.className = 'action-btn secondary-btn';
-                    leftBtn.style.cssText = 'width: 30px; height: 30px; padding: 0; display: flex; align-items: center; justify-content: center; font-weight: bold; border-radius: 4px; font-size: 1.2rem;';
-                    leftBtn.textContent = '<';
-                    leftBtn.onclick = (e) => {
-                        e.stopPropagation();
-                        ShowcaseModule.swapCards(index, index - 1);
+                itemContainer.addEventListener('dragstart', (e) => {
+                    e.dataTransfer.setData('text/plain', index);
+                    itemContainer.style.opacity = '0.5';
+                });
+                
+                itemContainer.addEventListener('dragend', () => {
+                    itemContainer.style.opacity = '1';
+                });
+                
+                itemContainer.addEventListener('dragover', (e) => {
+                    e.preventDefault(); // Necessary to allow dropping
+                    itemContainer.style.transform = 'scale(1.05)';
+                });
+                
+                itemContainer.addEventListener('dragleave', () => {
+                    itemContainer.style.transform = 'scale(1)';
+                });
+                
+                itemContainer.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    itemContainer.style.transform = 'scale(1)';
+                    const draggedIndex = parseInt(e.dataTransfer.getData('text/plain'));
+                    if (draggedIndex !== index && !isNaN(draggedIndex)) {
+                        ShowcaseModule.swapCards(draggedIndex, index);
                         RivalsModule.renderRivalShowcase(ShowcaseModule.getShowcase(), true);
-                    };
-                    controlsContainer.appendChild(leftBtn);
-                }
-                
-                if (index < urls.length - 1) {
-                    const rightBtn = document.createElement('button');
-                    rightBtn.className = 'action-btn secondary-btn';
-                    rightBtn.style.cssText = 'width: 30px; height: 30px; padding: 0; display: flex; align-items: center; justify-content: center; font-weight: bold; border-radius: 4px; font-size: 1.2rem;';
-                    rightBtn.textContent = '>';
-                    rightBtn.onclick = (e) => {
-                        e.stopPropagation();
-                        ShowcaseModule.swapCards(index, index + 1);
-                        RivalsModule.renderRivalShowcase(ShowcaseModule.getShowcase(), true);
-                    };
-                    controlsContainer.appendChild(rightBtn);
-                }
-                
-                if (controlsContainer.hasChildNodes()) {
-                    itemContainer.appendChild(controlsContainer);
-                }
+                    }
+                });
             }
 
             container.appendChild(itemContainer);
