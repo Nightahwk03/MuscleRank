@@ -1,0 +1,362 @@
+const RivalsModule = {
+    init() {
+        this.bindEvents();
+        
+        // When auth is ready, listen for friend requests
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                this.listenForRequests();
+                this.loadFriends();
+                this.ensureProfile();
+            }
+        });
+    },
+
+    bindEvents() {
+        const searchBtn = document.getElementById('rival-search-btn');
+        if (searchBtn) {
+            searchBtn.addEventListener('click', () => this.searchRival());
+        }
+
+        const closeCard = document.getElementById('player-card-close');
+        if (closeCard) {
+            closeCard.addEventListener('click', () => {
+                document.getElementById('player-card-overlay').style.display = 'none';
+            });
+        }
+    },
+
+    async ensureProfile() {
+        if (!SupabaseModule.currentUser) return;
+        try {
+            await db.collection('user_profiles').doc(SupabaseModule.currentUser.uid).set({
+                email: SupabaseModule.currentUser.email
+            }, { merge: true });
+        } catch(e) {
+            console.error('Error saving profile', e);
+        }
+    },
+
+    async searchRival() {
+        const email = document.getElementById('rival-search-input').value.trim();
+        const resultsDiv = document.getElementById('rival-search-results');
+        
+        if (!email) {
+            resultsDiv.innerHTML = '<span style="color: #ff4444;">Please enter an email address.</span>';
+            return;
+        }
+        if (email === SupabaseModule.currentUser.email) {
+            resultsDiv.innerHTML = '<span style="color: #ff4444;">You cannot add yourself as a rival!</span>';
+            return;
+        }
+
+        resultsDiv.innerHTML = 'Searching...';
+
+        try {
+            const usersRef = db.collection('user_profiles');
+            const snapshot = await usersRef.where('email', '==', email).get();
+            
+            if (snapshot.empty) {
+                resultsDiv.innerHTML = '<span style="color: #ff4444;">User not found. Make sure they have logged in at least once!</span>';
+                return;
+            }
+
+            const targetUser = snapshot.docs[0];
+            const targetData = targetUser.data();
+            
+            resultsDiv.innerHTML = `
+                <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--border-color);">
+                    <div>
+                        <div style="font-weight: 700; font-size: 1.1rem; margin-bottom: 5px;">${targetData.email}</div>
+                    </div>
+                    <button class="btn btn-primary" onclick="RivalsModule.sendRequest('${targetUser.id}', '${targetData.email}')">Send Rival Request</button>
+                </div>
+            `;
+        } catch (error) {
+            console.error('Search error:', error);
+            resultsDiv.innerHTML = '<span style="color: #ff4444;">Error searching for user.</span>';
+        }
+    },
+
+    async sendRequest(targetId, targetEmail) {
+        if (!SupabaseModule.currentUser) return;
+        
+        const myId = SupabaseModule.currentUser.uid;
+        const myEmail = SupabaseModule.currentUser.email;
+
+        try {
+            await db.collection('friend_requests').add({
+                senderId: myId,
+                senderEmail: myEmail,
+                receiverId: targetId,
+                status: 'pending',
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            document.getElementById('rival-search-results').innerHTML = '<span style="color: #00ff00;">Rival Request Sent!</span>';
+        } catch (error) {
+            console.error('Request error:', error);
+            alert('Failed to send request.');
+        }
+    },
+
+    listenForRequests() {
+        if (!SupabaseModule.currentUser) return;
+        
+        db.collection('friend_requests')
+          .where('receiverId', '==', SupabaseModule.currentUser.uid)
+          .where('status', '==', 'pending')
+          .onSnapshot(snapshot => {
+              const pendingPanel = document.getElementById('rival-pending-panel');
+              const pendingList = document.getElementById('rival-pending-list');
+              
+              if (snapshot.empty) {
+                  pendingPanel.style.display = 'none';
+                  pendingList.innerHTML = '';
+                  return;
+              }
+
+              pendingPanel.style.display = 'block';
+              pendingList.innerHTML = '';
+              
+              snapshot.forEach(doc => {
+                  const req = doc.data();
+                  const div = document.createElement('div');
+                  div.style.cssText = 'background: rgba(255,255,255,0.05); padding: 10px 15px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;';
+                  div.innerHTML = `
+                      <div><strong>${req.senderEmail}</strong> wants to be your rival!</div>
+                      <div style="display: flex; gap: 8px;">
+                          <button class="btn" style="background: var(--success); color: #fff; padding: 5px 10px; font-size: 0.8rem;" onclick="RivalsModule.acceptRequest('${doc.id}', '${req.senderId}', '${req.senderEmail}')">Accept</button>
+                          <button class="btn" style="background: var(--danger); color: #fff; padding: 5px 10px; font-size: 0.8rem;" onclick="RivalsModule.rejectRequest('${doc.id}')">Reject</button>
+                      </div>
+                  `;
+                  pendingList.appendChild(div);
+              });
+          });
+    },
+
+    async acceptRequest(requestId, senderId, senderEmail) {
+        try {
+            await db.collection('friend_requests').doc(requestId).update({ status: 'accepted' });
+            
+            // Add to my friends
+            await db.collection('user_profiles').doc(SupabaseModule.currentUser.uid)
+                    .collection('friends').doc(senderId).set({ email: senderEmail, addedAt: firebase.firestore.FieldValue.serverTimestamp() });
+            
+            // Add me to their friends
+            await db.collection('user_profiles').doc(senderId)
+                    .collection('friends').doc(SupabaseModule.currentUser.uid).set({ email: SupabaseModule.currentUser.email, addedAt: firebase.firestore.FieldValue.serverTimestamp() });
+
+            this.loadFriends();
+        } catch (e) {
+            console.error('Accept error:', e);
+        }
+    },
+
+    async rejectRequest(requestId) {
+        try {
+            await db.collection('friend_requests').doc(requestId).delete();
+        } catch (e) {
+            console.error('Reject error:', e);
+        }
+    },
+
+    async loadFriends() {
+        if (!SupabaseModule.currentUser) return;
+        
+        db.collection('user_profiles').doc(SupabaseModule.currentUser.uid).collection('friends')
+          .onSnapshot(snapshot => {
+              const grid = document.getElementById('rival-friends-grid');
+              
+              if (snapshot.empty) {
+                  grid.innerHTML = '<p style="color: var(--text-secondary);">You haven\'t added any rivals yet.</p>';
+                  return;
+              }
+
+              grid.innerHTML = '';
+              snapshot.forEach(doc => {
+                  const friend = doc.data();
+                  const friendId = doc.id;
+                  
+                  const card = document.createElement('div');
+                  card.style.cssText = 'background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 15px; cursor: pointer; transition: transform 0.2s, background 0.2s;';
+                  card.innerHTML = `
+                      <div style="font-weight: 700; font-size: 1.1rem; color: var(--neon-primary); margin-bottom: 10px;">${friend.email}</div>
+                      <div style="font-size: 0.8rem; color: var(--text-secondary);">Tap to view Player Card</div>
+                  `;
+                  
+                  card.onmouseover = () => card.style.background = 'rgba(255,255,255,0.1)';
+                  card.onmouseout = () => card.style.background = 'rgba(255,255,255,0.05)';
+                  
+                  card.onclick = () => this.viewPlayerCard(friendId, friend.email);
+                  
+                  grid.appendChild(card);
+              });
+          });
+    },
+
+    async viewPlayerCard(friendId, friendEmail) {
+        document.getElementById('player-card-name').textContent = friendEmail;
+        document.getElementById('player-card-overlay').style.display = 'flex';
+        
+        // Reset fields
+        document.getElementById('player-card-bw').textContent = 'Loading...';
+        document.getElementById('player-card-last-workout').textContent = 'Loading...';
+        document.getElementById('player-card-top-lifts').innerHTML = '';
+        document.getElementById('player-card-showcase').innerHTML = '';
+        document.getElementById('player-card-bodygraph').innerHTML = '';
+
+        try {
+            const doc = await db.collection('user_data').doc(friendId).get();
+            if (!doc.exists) {
+                document.getElementById('player-card-bw').textContent = 'No Data';
+                document.getElementById('player-card-last-workout').textContent = 'No Data';
+                return;
+            }
+
+            const data = doc.data().data;
+            if (!data) return;
+
+            // Extract Bodyweight
+            if (data.mr_bodyweight_history) {
+                const bwHist = JSON.parse(data.mr_bodyweight_history);
+                if (bwHist.length > 0) {
+                    document.getElementById('player-card-bw').textContent = bwHist[bwHist.length - 1].weight + ' kg';
+                }
+            }
+
+            // Extract Last Workout
+            if (data.mr_workout_log) {
+                const log = JSON.parse(data.mr_workout_log);
+                if (log.length > 0) {
+                    const last = log[0];
+                    const date = new Date(last.date).toLocaleDateString();
+                    document.getElementById('player-card-last-workout').textContent = last.routineName + ' (' + date + ')';
+                } else {
+                    document.getElementById('player-card-last-workout').textContent = 'None';
+                }
+            }
+
+            // Bodygraph
+            if (data.mr_muscles) {
+                const muscles = JSON.parse(data.mr_muscles);
+                this.renderRivalBodygraph(muscles);
+            }
+
+            // Top Lifts
+            if (data.mr_workout_log) {
+                const log = JSON.parse(data.mr_workout_log);
+                this.calculateRivalTopLifts(log);
+            }
+
+            // Pinned Cards
+            if (data.mr_pokemon) {
+                const collection = JSON.parse(data.mr_pokemon);
+                this.renderRivalShowcase(collection);
+            }
+
+        } catch (error) {
+            console.error('Error fetching player card:', error);
+        }
+    },
+
+    renderRivalBodygraph(muscles) {
+        const container = document.getElementById('player-card-bodygraph');
+        
+        const existingGraph = document.querySelector('.body-graph-container svg');
+        if (existingGraph) {
+            const clone = existingGraph.cloneNode(true);
+            
+            const rankColors = {
+                'Wood': '#8B5A2B', 'Bronze': '#CD7F32', 'Silver': '#C0C0C0',
+                'Gold': '#FFD700', 'Diamond': '#00BFFF', 'Platinum': '#E5E4E2',
+                'Obsidian': '#4B0082', 'Titanium': '#C0C0C0', 'Demon': '#ff0000'
+            };
+
+            const getColor = (rankStr) => {
+                const base = rankStr.split(' ')[0];
+                return rankColors[base] || '#333';
+            };
+
+            muscles.forEach(m => {
+                const path = clone.querySelector(`[data-id="${m.id}"]`);
+                if (path) {
+                    path.style.fill = getColor(m.rank);
+                }
+            });
+
+            container.innerHTML = '';
+            container.appendChild(clone);
+        }
+    },
+
+    calculateRivalTopLifts(logs) {
+        const bestLifts = {};
+        logs.forEach(session => {
+            if (!session.exercises) return;
+            session.exercises.forEach(ex => {
+                if (!ex.sets) return;
+                ex.sets.forEach(set => {
+                    if (set.reps > 0 && set.weight > 0) {
+                        if (!bestLifts[ex.exerciseId] || bestLifts[ex.exerciseId].weight < set.weight) {
+                            bestLifts[ex.exerciseId] = { weight: set.weight, reps: set.reps, name: ex.name || ex.exerciseId };
+                        }
+                    }
+                });
+            });
+        });
+
+        const sorted = Object.values(bestLifts).sort((a, b) => b.weight - a.weight).slice(0, 3);
+        const container = document.getElementById('player-card-top-lifts');
+        container.innerHTML = '';
+        
+        if (sorted.length === 0) {
+            container.innerHTML = '<p style="color: var(--text-secondary); font-size: 0.9rem;">No lifts recorded.</p>';
+            return;
+        }
+
+        sorted.forEach((lift, idx) => {
+            const div = document.createElement('div');
+            div.style.cssText = 'background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; border-left: 3px solid ' + (idx === 0 ? 'gold' : idx === 1 ? 'silver' : '#CD7F32');
+            div.innerHTML = `
+                <div style="font-weight: bold;">${lift.name}</div>
+                <div style="color: var(--neon-primary); font-weight: bold;">${lift.weight}kg <span style="color: var(--text-secondary); font-weight: normal; font-size: 0.8rem;">x ${lift.reps}</span></div>
+            `;
+            container.appendChild(div);
+        });
+    },
+
+    renderRivalShowcase(collection) {
+        const container = document.getElementById('player-card-showcase');
+        
+        let arr = [];
+        for (const pid in collection) {
+            arr.push(collection[pid]);
+        }
+        
+        if (arr.length === 0) {
+            container.innerHTML = '<p style="color: var(--text-secondary); font-size: 0.9rem; align-self: center;">No cards showcased.</p>';
+            return;
+        }
+
+        arr.sort((a, b) => (b.level || 0) - (a.level || 0));
+        const top3 = arr.slice(0, 3);
+
+        container.innerHTML = '';
+        top3.forEach(p => {
+            const type = p.isShiny ? 'shiny' : 'regular';
+            const spriteLib = p.isShiny ? (typeof SHINY_POKEMON_SPRITES !== 'undefined' ? SHINY_POKEMON_SPRITES : POKEMON_SPRITES) : POKEMON_SPRITES;
+            const spriteObj = spriteLib ? spriteLib.find(s => s.id === p.id) : null;
+            
+            if (spriteObj) {
+                const img = document.createElement('img');
+                img.src = spriteObj.src;
+                img.style.cssText = 'width: 80px; height: 80px; image-rendering: pixelated; border-radius: 8px; background: ' + (p.isShiny ? 'rgba(255,215,0,0.1)' : 'rgba(255,255,255,0.05)') + '; border: 1px solid ' + (p.isShiny ? 'gold' : 'rgba(255,255,255,0.1)');
+                container.appendChild(img);
+            }
+        });
+    }
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+    RivalsModule.init();
+});
