@@ -40,7 +40,7 @@ const RivalsModule = {
         const myCardBtn = document.getElementById('my-card-nav-btn');
         if (myCardBtn) {
             myCardBtn.addEventListener('click', () => {
-                const user = SupabaseModule.currentUser;
+                const user = FirebaseModule.currentUser;
                 if (user) {
                     RivalsModule.viewPlayerCard(user.uid, user.email);
                 } else {
@@ -51,10 +51,10 @@ const RivalsModule = {
     },
 
     async ensureProfile() {
-        if (!SupabaseModule.currentUser) return;
+        if (!FirebaseModule.currentUser) return;
         try {
-            await db.collection('user_profiles').doc(SupabaseModule.currentUser.uid).set({
-                email: SupabaseModule.currentUser.email
+            await db.collection('user_profiles').doc(FirebaseModule.currentUser.uid).set({
+                email: FirebaseModule.currentUser.email
             }, { merge: true });
         } catch(e) {
             console.error('Error saving profile', e);
@@ -69,7 +69,7 @@ const RivalsModule = {
             resultsDiv.innerHTML = '<span style="color: #ff4444;">Please enter an email address.</span>';
             return;
         }
-        if (email === SupabaseModule.currentUser.email) {
+        if (email === FirebaseModule.currentUser.email) {
             resultsDiv.innerHTML = '<span style="color: #ff4444;">You cannot add yourself as a rival!</span>';
             return;
         }
@@ -103,10 +103,10 @@ const RivalsModule = {
     },
 
     async sendRequest(targetId, targetEmail) {
-        if (!SupabaseModule.currentUser) return;
+        if (!FirebaseModule.currentUser) return;
         
-        const myId = SupabaseModule.currentUser.uid;
-        const myEmail = SupabaseModule.currentUser.email;
+        const myId = FirebaseModule.currentUser.uid;
+        const myEmail = FirebaseModule.currentUser.email;
 
         try {
             // Check for pending request or existing friend
@@ -141,10 +141,10 @@ const RivalsModule = {
     },
 
     listenForRequests() {
-        if (!SupabaseModule.currentUser) return;
+        if (!FirebaseModule.currentUser) return;
         
         db.collection('friend_requests')
-          .where('receiverId', '==', SupabaseModule.currentUser.uid)
+          .where('receiverId', '==', FirebaseModule.currentUser.uid)
           .where('status', '==', 'pending')
           .onSnapshot(snapshot => {
               const pendingPanel = document.getElementById('rival-pending-panel');
@@ -180,12 +180,12 @@ const RivalsModule = {
             await db.collection('friend_requests').doc(requestId).update({ status: 'accepted' });
             
             // Add to my friends
-            await db.collection('user_profiles').doc(SupabaseModule.currentUser.uid)
+            await db.collection('user_profiles').doc(FirebaseModule.currentUser.uid)
                     .collection('friends').doc(senderId).set({ email: senderEmail, addedAt: firebase.firestore.FieldValue.serverTimestamp() });
             
             // Add me to their friends
             await db.collection('user_profiles').doc(senderId)
-                    .collection('friends').doc(SupabaseModule.currentUser.uid).set({ email: SupabaseModule.currentUser.email, addedAt: firebase.firestore.FieldValue.serverTimestamp() });
+                    .collection('friends').doc(FirebaseModule.currentUser.uid).set({ email: FirebaseModule.currentUser.email, addedAt: firebase.firestore.FieldValue.serverTimestamp() });
 
             ChangeLogModule.log('social', `Accepted rival request from ${senderEmail}`);
             this.loadFriends();
@@ -204,18 +204,18 @@ const RivalsModule = {
     },
 
     async removeRival(friendId, friendEmail) {
-        if (!SupabaseModule.currentUser) return;
+        if (!FirebaseModule.currentUser) return;
         const confirmRemove = confirm(`Are you sure you want to remove ${friendEmail} as a rival?`);
         if (!confirmRemove) return;
 
         try {
             // Remove from my friends
-            await db.collection('user_profiles').doc(SupabaseModule.currentUser.uid)
+            await db.collection('user_profiles').doc(FirebaseModule.currentUser.uid)
                     .collection('friends').doc(friendId).delete();
             
             // Remove me from their friends
             await db.collection('user_profiles').doc(friendId)
-                    .collection('friends').doc(SupabaseModule.currentUser.uid).delete();
+                    .collection('friends').doc(FirebaseModule.currentUser.uid).delete();
 
             ChangeLogModule.log('social', `Removed ${friendEmail} from your rivals list.`);
         } catch (e) {
@@ -224,9 +224,9 @@ const RivalsModule = {
     },
 
     async loadFriends() {
-        if (!SupabaseModule.currentUser) return;
+        if (!FirebaseModule.currentUser) return;
         
-        db.collection('user_profiles').doc(SupabaseModule.currentUser.uid).collection('friends')
+        db.collection('user_profiles').doc(FirebaseModule.currentUser.uid).collection('friends')
           .onSnapshot(snapshot => {
               const grid = document.getElementById('rival-friends-grid');
               
@@ -248,7 +248,7 @@ const RivalsModule = {
                               <div style="font-weight: 700; font-size: 1.1rem; color: var(--neon-primary); margin-bottom: 5px;">${friend.email}</div>
                               <div style="font-size: 0.8rem; color: var(--text-secondary);">Tap to view Player Card</div>
                           </div>
-                          <button class="action-btn danger-btn" style="width: auto; padding: 4px 8px; font-size: 0.75rem; margin: 0;" onclick="event.stopPropagation(); RivalsModule.removeRival('${friendId}', '${friend.email}')">Unrival</button>
+                          <button class="action-btn danger-btn" style="width: auto; padding: 4px 8px; font-size: 0.75rem; margin: 0;" onclick="event.stopPropagation(); RivalsModule.removeRival('${friendId}', '${friend.email}')">Unfriend</button>
                       </div>
                   `;
                   

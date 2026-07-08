@@ -36,11 +36,41 @@ const INITIAL_MUSCLES = [
 ];
 
 const INITIAL_EXERCISES = [
-    { id: 'bench_press', name: 'Bench Press', type: 'compound', hasWarmup: true, muscleContributions: { chest: 0.7, triceps: 0.2, shoulders: 0.1 } },
-    { id: 'bicep_curl', name: 'Bicep Curl', type: 'isolation', muscleContributions: { biceps: 1.0 } },
-    { id: 'squat', name: 'Barbell Squat', type: 'compound', hasWarmup: true, muscleContributions: { quads: 0.6, hamstrings: 0.2, core: 0.2 } },
-    { id: 'deadlift', name: 'Deadlift', type: 'compound', hasWarmup: true, muscleContributions: { hamstrings: 0.4, lats: 0.3, core: 0.2, quads: 0.1 } },
-    { id: 'pullup', name: 'Pull-up', type: 'compound', hasWarmup: true, muscleContributions: { lats: 0.7, biceps: 0.3 } }
+  { id: 'pushups', name: 'Pushups', type: 'compound', hasWarmup: true, isBodyweight: true, muscleContributions: { chest: 1.0, triceps: 0.3, shoulders: 0.3, core: 0.3 } },
+  { id: 'flat_bench_press', name: 'Flat Bench Press', type: 'compound', hasWarmup: true, isBodyweight: false, muscleContributions: { chest: 1.0, triceps: 0.3, shoulders: 0.3, core: 0.3 } },
+  { id: 'incline_bench_press', name: 'Incline Bench Press', type: 'compound', hasWarmup: false, isBodyweight: false, muscleContributions: { chest: 1.0, triceps: 0.3, shoulders: 0.3, core: 0.3 } },
+  { id: 'chest_flys', name: 'Chest Flys', type: 'compound', hasWarmup: false, isBodyweight: false, muscleContributions: { chest: 1.0, triceps: 0.3, shoulders: 0.3, core: 0.3 } },
+  { id: 'overhead_shoulder_press', name: 'Overhead Shoulder Press', type: 'isolation', hasWarmup: false, isBodyweight: false, muscleContributions: { shoulders: 1.0 } },
+  { id: 'shoulder_lateral_raises', name: 'Shoulder Lateral Raises', type: 'isolation', hasWarmup: false, isBodyweight: false, muscleContributions: { shoulders: 1.0 } },
+  { id: 'rear_delt_flys', name: 'Rear Delt Flys', type: 'isolation', hasWarmup: false, isBodyweight: false, muscleContributions: { shoulders: 1.0 } },
+  { id: 'tricep_dips', name: 'Tricep Dips', type: 'compound', hasWarmup: false, isBodyweight: true, muscleContributions: { triceps: 1.0, chest: 0.3, shoulders: 0.3, forearms: 0.3, core: 0.3 } },
+  { id: 'tricep_extensions', name: 'Tricep Extensions', type: 'isolation', hasWarmup: false, isBodyweight: false, muscleContributions: { triceps: 1.0 } },
+  { id: 'tricep_kickbacks', name: 'Tricep Kickbacks', type: 'isolation', hasWarmup: false, isBodyweight: false, muscleContributions: { triceps: 1.0 } },
+  { id: 'tricep_overhead_extensions', name: 'Tricep Overhead Extensions', type: 'isolation', hasWarmup: false, isBodyweight: false, muscleContributions: { triceps: 1.0 } },
+  { id: 'lower_back_extension', name: 'Lower Back Extension', type: 'isolation', hasWarmup: false, isBodyweight: true, muscleContributions: { lower_back: 1.0, hamstrings: 0.3 } },
+  { id: 'pullups', name: 'Pullups', type: 'compound', hasWarmup: true, isBodyweight: true, muscleContributions: { upper_back: 1.0, lats: 0.3, lower_back: 0.3, forearms: 0.3, biceps: 0.3, shoulders: 0.3 } },
+  { id: 'chinups', name: 'Chinups', type: 'compound', hasWarmup: true, isBodyweight: true, muscleContributions: { biceps: 1.0, forearms: 0.3, shoulders: 0.3, lats: 0.3 } },
+  { id: 'lat_pulldowns', name: 'Lat Pulldowns', type: 'isolation', hasWarmup: false, isBodyweight: false, muscleContributions: { lats: 1.0, biceps: 0.3, upper_back: 0.3, shoulders: 0.3, forearms: 0.3 } },
+  { id: 'narrow_grip_rows', name: 'Narrow Grip Rows', type: 'isolation', hasWarmup: false, isBodyweight: false, muscleContributions: { lower_back: 1.0, forearms: 0.3, biceps: 0.3 } },
+  { id: 'single_arm_rows', name: 'Single Arm Rows', type: 'isolation', hasWarmup: false, isBodyweight: false, muscleContributions: { lats: 1.0, lower_back: 0.3, forearms: 0.3, core: 0.3 } },
+  { id: 'deadlift', name: 'Deadlift', type: 'compound', hasWarmup: false, isBodyweight: false, muscleContributions: { lower_back: 1.0, hamstrings: 0.3, forearms: 0.3, biceps: 0.3, core: 0.3, quads: 0.3 } },
+  { id: 'preacher_curls', name: 'Preacher Curls', type: 'isolation', hasWarmup: false, isBodyweight: false, muscleContributions: { biceps: 1.0 } },
+  { id: 'barbell_curls', name: 'Barbell Curls', type: 'isolation', hasWarmup: false, isBodyweight: false, muscleContributions: { biceps: 1.0 } },
+  { id: 'cable_curls', name: 'Cable Curls', type: 'isolation', hasWarmup: false, isBodyweight: false, muscleContributions: { biceps: 1.0 } },
+  { id: 'reverse_curls', name: 'Reverse Curls', type: 'isolation', hasWarmup: false, isBodyweight: false, muscleContributions: { forearms: 1.0, biceps: 0.3 } },
+  { id: 'barbell_holds', name: 'Barbell Holds', type: 'isolation', hasWarmup: false, isBodyweight: false, muscleContributions: { forearms: 1.0 } },
+  { id: 'finger_curls', name: 'Finger Curls', type: 'isolation', hasWarmup: false, isBodyweight: false, muscleContributions: { forearms: 1.0 } },
+  { id: 'barbell_squat', name: 'Barbell Squat', type: 'compound', hasWarmup: true, isBodyweight: false, muscleContributions: { quads: 1.0, hamstrings: 0.3, calves: 0.3, glutes: 0.3, core: 0.3 } },
+  { id: 'hack_squat', name: 'Hack/Belt/Pendulum Squat', type: 'compound', hasWarmup: true, isBodyweight: false, muscleContributions: { quads: 1.0, hamstrings: 0.3, calves: 0.3, glutes: 0.3, core: 0.3 } },
+  { id: 'calf_raises', name: 'Calf Raises', type: 'isolation', hasWarmup: false, isBodyweight: true, muscleContributions: { calves: 1.0 } },
+  { id: 'hamstring_extensions', name: 'Hamstring Extensions', type: 'isolation', hasWarmup: false, isBodyweight: false, muscleContributions: { hamstrings: 1.0 } },
+  { id: 'quad_extensions', name: 'Quad Extensions', type: 'isolation', hasWarmup: false, isBodyweight: false, muscleContributions: { quads: 1.0 } },
+  { id: 'stiff_legged_rdls', name: 'Stiff Legged RDLs', type: 'compound', hasWarmup: false, isBodyweight: false, muscleContributions: { hamstrings: 1.0, forearms: 0.3, glutes: 0.3, lower_back: 0.3 } },
+  { id: 'hip_abductors', name: 'Hip Abductors', type: 'isolation', hasWarmup: false, isBodyweight: false, muscleContributions: { glutes: 1.0, quads: 0.3 } },
+  { id: 'hip_thrusts', name: 'Hip Thrusts', type: 'compound', hasWarmup: false, isBodyweight: false, muscleContributions: { glutes: 1.0, quads: 0.3, hamstrings: 0.3, calves: 0.3, core: 0.3, lower_back: 0.3 } },
+  { id: 'ab_crunches', name: 'Ab Crunches', type: 'isolation', hasWarmup: false, isBodyweight: false, muscleContributions: { core: 1.0 } },
+  { id: 'hanging_leg_raises', name: "Hanging Leg Raises", type: 'isolation', hasWarmup: false, isBodyweight: true, muscleContributions: { core: 1.0 } },
+  { id: 'skull_crushers', name: 'Skull Crushers', type: 'isolation', hasWarmup: false, isBodyweight: false, muscleContributions: { triceps: 1.0 } }
 ];
 
 const MAJOR_RANKS = [
@@ -69,7 +99,7 @@ MAJOR_RANKS.forEach(rank => {
 });
 
 // --- storage.js ---
-const SupabaseModule = {
+const FirebaseModule = {
     currentUser: null,
     syncTimeout: null,
     
@@ -183,8 +213,8 @@ const Storage = {
     set(key, value) {
         try {
             localStorage.setItem(key, JSON.stringify(value));
-            if (SupabaseModule.currentUser) {
-                SupabaseModule.scheduleSync();
+            if (FirebaseModule.currentUser) {
+                FirebaseModule.scheduleSync();
             }
         } catch (e) {
             console.error('Error writing to localStorage', e);
@@ -550,8 +580,8 @@ const ShowcaseModule = {
         ChangeLogModule.log('social', "Updated your Pokemon Showcase.");
     },
     syncToProfile() {
-        if (SupabaseModule.currentUser) {
-            db.collection('user_profiles').doc(SupabaseModule.currentUser.uid).set({
+        if (FirebaseModule.currentUser) {
+            db.collection('user_profiles').doc(FirebaseModule.currentUser.uid).set({
                 mr_pokemon: JSON.stringify(this.showcase)
             }, { merge: true });
         }
@@ -814,9 +844,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderProfile() {
-        if (SupabaseModule.currentUser) {
+        if (FirebaseModule.currentUser) {
             const emailEl = document.getElementById('profile-email-display');
-            if (emailEl) emailEl.textContent = SupabaseModule.currentUser.email;
+            if (emailEl) emailEl.textContent = FirebaseModule.currentUser.email;
         }
     }
 
@@ -1463,7 +1493,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (signOutBtn) {
         signOutBtn.addEventListener('click', () => {
             if (confirm("Are you sure you want to sign out?")) {
-                SupabaseModule.logout();
+                FirebaseModule.logout();
             }
         });
     }
@@ -3011,7 +3041,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 // Initial Auth Check
-SupabaseModule.checkSession().then(isLoggedIn => {
+FirebaseModule.checkSession().then(isLoggedIn => {
     if (isLoggedIn) {
         document.getElementById('auth-overlay').style.display = 'none';
     }
@@ -3057,9 +3087,9 @@ if (document.getElementById('show-login-btn')) {
         
         try {
             if (isLoginMode) {
-                await SupabaseModule.login(email, password);
+                await FirebaseModule.login(email, password);
             } else {
-                await SupabaseModule.register(email, password);
+                await FirebaseModule.register(email, password);
             }
             authOverlay.style.display = 'none';
             window.location.reload(); 
