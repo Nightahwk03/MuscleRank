@@ -71,7 +71,7 @@ const RivalsModule = {
                     <div>
                         <div style="font-weight: 700; font-size: 1.1rem; margin-bottom: 5px;">${targetData.email}</div>
                     </div>
-                    <button class="btn btn-primary" onclick="RivalsModule.sendRequest('${targetUser.id}', '${targetData.email}')">Send Rival Request</button>
+                    <button class="action-btn primary-btn" style="width: auto; padding: 8px 15px; font-size: 0.9rem; margin: 0;" onclick="RivalsModule.sendRequest('${targetUser.id}', '${targetData.email}')">Send Request</button>
                 </div>
             `;
         } catch (error) {
@@ -87,13 +87,19 @@ const RivalsModule = {
         const myEmail = SupabaseModule.currentUser.email;
 
         try {
-            // Check for existing request or if already friends
+            // Check for pending request or existing friend
             const existingRef = db.collection('friend_requests');
-            const q1 = await existingRef.where('senderId', '==', myId).where('receiverId', '==', targetId).get();
-            const q2 = await existingRef.where('senderId', '==', targetId).where('receiverId', '==', myId).get();
+            const q1 = await existingRef.where('senderId', '==', myId).where('receiverId', '==', targetId).where('status', '==', 'pending').get();
+            const q2 = await existingRef.where('senderId', '==', targetId).where('receiverId', '==', myId).where('status', '==', 'pending').get();
             
+            const friendDoc = await db.collection('user_profiles').doc(myId).collection('friends').doc(targetId).get();
+
             if (!q1.empty || !q2.empty) {
-                document.getElementById('rival-search-results').innerHTML = '<span style="color: #ff4444;">A request already exists or you are already rivals!</span>';
+                document.getElementById('rival-search-results').innerHTML = '<span style="color: #ff4444;">A pending request already exists!</span>';
+                return;
+            }
+            if (friendDoc.exists) {
+                document.getElementById('rival-search-results').innerHTML = '<span style="color: #ff4444;">You are already rivals!</span>';
                 return;
             }
 
@@ -138,8 +144,8 @@ const RivalsModule = {
                   div.innerHTML = `
                       <div><strong>${req.senderEmail}</strong> wants to be your rival!</div>
                       <div style="display: flex; gap: 8px;">
-                          <button class="action-btn primary-btn" style="padding: 5px 10px; font-size: 0.8rem; margin: 0;" onclick="RivalsModule.acceptRequest('${doc.id}', '${req.senderId}', '${req.senderEmail}')">Accept</button>
-                          <button class="action-btn danger-btn" style="padding: 5px 10px; font-size: 0.8rem; margin: 0;" onclick="RivalsModule.rejectRequest('${doc.id}')">Reject</button>
+                          <button class="action-btn primary-btn" style="width: auto; padding: 5px 10px; font-size: 0.8rem; margin: 0;" onclick="RivalsModule.acceptRequest('${doc.id}', '${req.senderId}', '${req.senderEmail}')">Accept</button>
+                          <button class="action-btn danger-btn" style="width: auto; padding: 5px 10px; font-size: 0.8rem; margin: 0;" onclick="RivalsModule.rejectRequest('${doc.id}')">Reject</button>
                       </div>
                   `;
                   pendingList.appendChild(div);
@@ -220,7 +226,7 @@ const RivalsModule = {
                               <div style="font-weight: 700; font-size: 1.1rem; color: var(--neon-primary); margin-bottom: 5px;">${friend.email}</div>
                               <div style="font-size: 0.8rem; color: var(--text-secondary);">Tap to view Player Card</div>
                           </div>
-                          <button class="action-btn danger-btn" style="padding: 4px 8px; font-size: 0.75rem; margin: 0;" onclick="event.stopPropagation(); RivalsModule.removeRival('${friendId}', '${friend.email}')">Unrival</button>
+                          <button class="action-btn danger-btn" style="width: auto; padding: 4px 8px; font-size: 0.75rem; margin: 0;" onclick="event.stopPropagation(); RivalsModule.removeRival('${friendId}', '${friend.email}')">Unrival</button>
                       </div>
                   `;
                   
