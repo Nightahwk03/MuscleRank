@@ -347,16 +347,26 @@ const RivalsModule = {
             clone.style.height = 'auto';
             clone.style.display = 'block';
             clone.style.margin = '0 auto';
+            clone.style.background = 'rgba(255, 255, 255, 0.05)';
+            clone.style.borderRadius = '20px';
+            clone.style.padding = '20px';
             
             const rankColors = {
-                'Wood': '#8B5A2B', 'Bronze': '#CD7F32', 'Silver': '#C0C0C0',
-                'Gold': '#FFD700', 'Diamond': '#00BFFF', 'Platinum': '#E5E4E2',
-                'Obsidian': '#4B0082', 'Titanium': '#C0C0C0', 'Demon': '#ff0000'
+                'Unranked': '#FFFFFF',
+                'Wood': '#D2B48C',
+                'Bronze': '#CD7F32',
+                'Silver': '#C0C0C0',
+                'Gold': '#FFD700',
+                'Diamond': '#9B30FF',
+                'Platinum': '#E5E4E2',
+                'Obsidian': '#4B0082',
+                'Titanium': '#E6E6FA',
+                'Demon': '#FF4500'
             };
 
             const getColor = (rankStr) => {
                 const base = rankStr.split(' ')[0];
-                return rankColors[base] || '#333';
+                return rankColors[base] || '#FFFFFF';
             };
             
             const muscleToSlugs = {
@@ -477,7 +487,7 @@ const RivalsModule = {
         container.style.flexWrap = 'wrap';
         container.style.padding = '20px';
 
-        urls.forEach(url => {
+        urls.forEach((url, index) => {
             const cardWrap = document.createElement('div');
             const isShiny = url.includes('Shiny');
             const borderColor = isShiny ? '#FFD700' : 'var(--neon-primary)';
@@ -495,6 +505,7 @@ const RivalsModule = {
                 box-shadow: inset 0 0 15px rgba(0,0,0,0.8), 0 0 12px ${borderColor}60; 
                 position: relative;
                 overflow: hidden;
+                cursor: pointer;
             `;
             
             const img = document.createElement('img');
@@ -505,6 +516,13 @@ const RivalsModule = {
             // Hover effect for the card itself
             cardWrap.onmouseover = () => img.style.transform = 'scale(1.1) translateY(-5px)';
             cardWrap.onmouseout = () => img.style.transform = 'scale(1) translateY(0)';
+            
+            // Lightbox functionality
+            cardWrap.onclick = () => {
+                if (window.openLightbox) {
+                    window.openLightbox(urls, index);
+                }
+            };
             
             cardWrap.appendChild(img);
             container.appendChild(cardWrap);
