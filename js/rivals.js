@@ -271,20 +271,27 @@ const RivalsModule = {
         // Reset fields
         document.getElementById('player-card-bw').textContent = 'Loading...';
         document.getElementById('player-card-last-workout').textContent = 'Loading...';
-        document.getElementById('player-card-top-lifts').innerHTML = '';
-        document.getElementById('player-card-showcase').innerHTML = '';
-        document.getElementById('player-card-bodygraph').innerHTML = '';
-
-        try {
-            const doc = await db.collection('user_data').doc(friendId).get();
+            const [doc, profileDoc] = await Promise.all([
+                db.collection('user_data').doc(friendId).get(),
+                db.collection('user_profiles').doc(friendId).get()
+            ]);
+            
             if (!doc.exists) {
                 document.getElementById('player-card-bw').textContent = 'No Data';
                 document.getElementById('player-card-last-workout').textContent = 'No Data';
                 return;
             }
 
-            const data = doc.data().data;
-            if (!data) return;
+            const data = doc.data().data || {};
+
+            // Pinned Cards (fetch from user_profiles)
+            if (profileDoc.exists && profileDoc.data().mr_pokemon) {
+                let showcaseUrls = [];
+                try {
+                    showcaseUrls = JSON.parse(profileDoc.data().mr_pokemon);
+                } catch(e) {}
+                this.renderRivalShowcase(showcaseUrls);
+            }
 
             // Extract Bodyweight
             if (data.mr_bodyweight_history) {
@@ -331,10 +338,16 @@ const RivalsModule = {
 
     renderRivalBodygraph(muscles) {
         const container = document.getElementById('player-card-bodygraph');
+        container.innerHTML = '';
         
         const existingGraph = document.querySelector('.body-map-container svg');
         if (existingGraph) {
             const clone = existingGraph.cloneNode(true);
+            clone.style.width = '100%';
+            clone.style.maxWidth = '300px';
+            clone.style.height = 'auto';
+            clone.style.display = 'block';
+            clone.style.margin = '0 auto';
             
             const rankColors = {
                 'Wood': '#8B5A2B', 'Bronze': '#CD7F32', 'Silver': '#C0C0C0',
@@ -418,34 +431,25 @@ const RivalsModule = {
         });
     },
 
-    renderRivalShowcase(collection) {
+    renderRivalShowcase(urls) {
         const container = document.getElementById('player-card-showcase');
         
-        let arr = [];
-        for (const pid in collection) {
-            arr.push(collection[pid]);
-        }
-        
-        if (arr.length === 0) {
+        if (!urls || urls.length === 0) {
             container.innerHTML = '<p style="color: var(--text-secondary); font-size: 0.9rem; align-self: center;">No cards showcased.</p>';
             return;
         }
 
-        arr.sort((a, b) => (b.level || 0) - (a.level || 0));
-        const top3 = arr.slice(0, 3);
-
         container.innerHTML = '';
-        top3.forEach(p => {
-            const type = p.isShiny ? 'shiny' : 'regular';
-            const spriteLib = p.isShiny ? (typeof SHINY_POKEMON_SPRITES !== 'undefined' ? SHINY_POKEMON_SPRITES : POKEMON_SPRITES) : POKEMON_SPRITES;
-            const spriteObj = spriteLib ? spriteLib.find(s => s.id === p.id) : null;
-            
-            if (spriteObj) {
-                const img = document.createElement('img');
-                img.src = spriteObj.src;
-                img.style.cssText = 'width: 80px; height: 80px; image-rendering: pixelated; border-radius: 8px; background: ' + (p.isShiny ? 'rgba(255,215,0,0.1)' : 'rgba(255,255,255,0.05)') + '; border: 1px solid ' + (p.isShiny ? 'gold' : 'rgba(255,255,255,0.1)');
-                container.appendChild(img);
-            }
+        container.style.display = 'flex';
+        container.style.justifyContent = 'center';
+        container.style.gap = '15px';
+        container.style.flexWrap = 'wrap';
+
+        urls.forEach(url => {
+            const img = document.createElement('img');
+            img.src = url;
+            img.style.cssText = 'width: 100px; height: 140px; object-fit: contain; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.3); background: rgba(0,0,0,0.2);';
+            container.appendChild(img);
         });
     }
 };
@@ -453,3 +457,4 @@ const RivalsModule = {
 document.addEventListener('DOMContentLoaded', () => {
     RivalsModule.init();
 });
+
