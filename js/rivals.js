@@ -40,7 +40,7 @@ const RivalsModule = {
         const myCardBtn = document.getElementById('my-card-nav-btn');
         if (myCardBtn) {
             myCardBtn.addEventListener('click', () => {
-                const user = auth.currentUser;
+                const user = SupabaseModule.currentUser;
                 if (user) {
                     RivalsModule.viewPlayerCard(user.uid, user.email);
                 } else {
