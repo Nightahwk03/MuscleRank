@@ -1186,7 +1186,25 @@ input:-webkit-autofill:active {
 /* Bottom Stats Grid Responsive */
 @media (max-width: 900px) {
     .stats-bottom-grid {
-        grid-template-columns: 1fr !important;
+    filter: drop-shadow(0 10px 15px rgba(0,0,0,0.5));
+    transition: transform 0.3s ease;
+}
+
+@media (max-width: 768px) {
+    .showcase-card-wrapper {
+        width: 140px;
+        height: 180px;
+    }
+    .showcase-card-img {
+        width: 100px;
+        height: 140px;
+    }
+    #player-card-showcase {
+        gap: 15px !important;
+    }
+}
+
+    grid-template-columns: 1fr !important;
     }
 }
 
@@ -1202,6 +1220,7 @@ input:-webkit-autofill:active {
     position: relative;
     overflow: hidden;
     cursor: pointer;
+    flex-shrink: 0;
 }
 
 .showcase-card-img {
