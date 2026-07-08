@@ -533,6 +533,31 @@ const DraftModule = {
 };
 
 // --- pokemon.js ---
+
+const ShowcaseModule = {
+    showcase: [],
+    init() {
+        this.showcase = Storage.get('mr_pokemon_showcase', []);
+    },
+    setDisplay(cardUrl, replacingIndex = -1) {
+        if (replacingIndex >= 0 && replacingIndex < 3) {
+            this.showcase[replacingIndex] = cardUrl;
+        } else if (this.showcase.length < 3) {
+            this.showcase.push(cardUrl);
+        }
+        Storage.set('mr_pokemon_showcase', this.showcase);
+        this.syncToProfile();
+        ChangeLogModule.log('social', "Updated your Pokemon Showcase.");
+    },
+    syncToProfile() {
+        if (SupabaseModule.currentUser) {
+            db.collection('user_profiles').doc(SupabaseModule.currentUser.uid).set({
+                mr_pokemon: JSON.stringify(this.showcase)
+            }, { merge: true });
+        }
+    },
+    getShowcase() { return this.showcase; }
+};
 const PokemonModule = {
     unlocked: [],
     unlockedShiny: [],
@@ -1408,7 +1433,9 @@ document.addEventListener('DOMContentLoaded', () => {
             // Reset Pokemon Collection
             Storage.set('mr_pokemon_unlocked', []);
             Storage.set('mr_pokemon_shiny', []);
+            Storage.set('mr_pokemon_showcase', []);
             PokemonModule.init();
+            ShowcaseModule.init();
             
             // Future placeholders for Shop, Exp
             Storage.set('mr_exp', 0);
@@ -3145,3 +3172,128 @@ if (toggleResetConfirmBtn && resetConfirmInput) {
         }
     });
 }
+
+// Global Escape Key Binding
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        const pcOverlay = document.getElementById('player-card-overlay');
+        const pcClose = document.getElementById('player-card-close');
+        if (pcOverlay && pcClose && pcOverlay.style.display !== 'none') pcClose.click();
+        
+        const lbModal = document.getElementById('card-lightbox-modal');
+        const lbClose = document.getElementById('close-lightbox-btn');
+        if (lbModal && lbClose && lbModal.style.display !== 'none') lbClose.click();
+        
+        const plModal = document.getElementById('pull-log-modal');
+        const plClose = document.getElementById('close-pull-log-modal-btn');
+        if (plModal && plClose && !plModal.classList.contains('hidden')) plClose.click();
+        
+        const packView = document.getElementById('pack-open-view');
+        const backBtn = document.getElementById('back-to-packs-btn');
+        if (packView && backBtn && packView.style.display !== 'none') backBtn.click();
+        
+        const ruModal = document.getElementById('rank-up-modal');
+        const ruClose = document.getElementById('close-modal-btn');
+        if (ruModal && ruClose && !ruModal.classList.contains('hidden')) ruClose.click();
+    }
+    
+    // --- Pokemon Showcase Mechanics ---
+    let pendingShowcaseCard = null;
+    
+    window.attemptSetShowcase = function(sprite, isShiny) {
+        const url = (isShiny ? 'Shiny Pokemon/' : 'pokemon-sprites/') + sprite;
+        const currentShowcase = ShowcaseModule.getShowcase();
+        
+        if (currentShowcase.length < 3) {
+            ShowcaseModule.setDisplay(url);
+            alert("Card added to showcase!");
+            renderPlayerCardShowcase && typeof renderPlayerCardShowcase === 'function' && renderPlayerCardShowcase();
+        } else {
+            pendingShowcaseCard = url;
+            const modal = document.getElementById('showcase-replace-modal');
+            const grid = document.getElementById('showcase-replace-grid');
+            if(modal && grid) {
+                grid.innerHTML = '';
+                currentShowcase.forEach((existingUrl, idx) => {
+                    const img = document.createElement('img');
+                    img.src = existingUrl;
+                    img.style.width = '100px';
+                    img.style.height = '140px';
+                    img.style.objectFit = 'contain';
+                    img.style.cursor = 'pointer';
+                    img.style.border = '2px solid transparent';
+                    img.style.borderRadius = '8px';
+                    img.style.transition = '0.2s';
+                    img.onmouseover = () => img.style.borderColor = 'var(--neon-primary)';
+                    img.onmouseout = () => img.style.borderColor = 'transparent';
+                    img.onclick = () => {
+                        ShowcaseModule.setDisplay(pendingShowcaseCard, idx);
+                        modal.classList.add('hidden');
+                        alert("Showcase card replaced!");
+                        pendingShowcaseCard = null;
+                        renderPlayerCardShowcase && typeof renderPlayerCardShowcase === 'function' && renderPlayerCardShowcase();
+                    };
+                    grid.appendChild(img);
+                });
+                modal.classList.remove('hidden');
+            }
+        }
+    };
+
+    const cancelShowcaseBtn = document.getElementById('close-showcase-replace-btn');
+    if (cancelShowcaseBtn) {
+        cancelShowcaseBtn.addEventListener('click', () => {
+            document.getElementById('showcase-replace-modal').classList.add('hidden');
+            pendingShowcaseCard = null;
+        });
+    }
+
+    
+    // Global Esc key binding
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            // Check modals first
+            const lightbox = document.getElementById('lightbox-modal');
+            if (lightbox && !lightbox.classList.contains('hidden') && lightbox.style.display !== 'none') {
+                const closeBtn = document.getElementById('close-lightbox');
+                if (closeBtn) closeBtn.click();
+                return;
+            }
+
+            const pullLogModal = document.getElementById('pull-log-modal');
+            if (pullLogModal && !pullLogModal.classList.contains('hidden')) {
+                const closeBtn = document.getElementById('close-pull-log-modal');
+                if (closeBtn) closeBtn.click();
+                return;
+            }
+
+            const showcaseModal = document.getElementById('showcase-replace-modal');
+            if (showcaseModal && !showcaseModal.classList.contains('hidden')) {
+                const closeBtn = document.getElementById('close-showcase-replace-btn');
+                if (closeBtn) closeBtn.click();
+                return;
+            }
+
+            const playerCardModal = document.getElementById('player-card-overlay');
+            if (playerCardModal && !playerCardModal.classList.contains('hidden') && playerCardModal.style.display !== 'none') {
+                const closeBtn = document.getElementById('player-card-close');
+                if (closeBtn) closeBtn.click();
+                return;
+            }
+
+            // Check full screen views
+            const packOpenView = document.getElementById('pack-open-view');
+            if (packOpenView && packOpenView.style.display !== 'none') {
+                const backBtn = document.getElementById('back-to-packs-btn');
+                if (backBtn) backBtn.click();
+                return;
+            }
+
+            const workoutActive = document.getElementById('workout-active');
+            if (workoutActive && !workoutActive.classList.contains('hidden')) {
+                // Ignore esc in active workout so they don't accidentally cancel
+            }
+        }
+    });
+
+});

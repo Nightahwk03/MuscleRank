@@ -14,8 +14,18 @@ const RivalsModule = {
 
     bindEvents() {
         const searchBtn = document.getElementById('rival-search-btn');
+        const searchInput = document.getElementById('rival-search-input');
+        
         if (searchBtn) {
             searchBtn.addEventListener('click', () => this.searchRival());
+        }
+        
+        if (searchInput) {
+            searchInput.addEventListener('keyup', (e) => {
+                if (e.key === 'Enter') {
+                    this.searchRival();
+                }
+            });
         }
 
         const closeCard = document.getElementById('player-card-close');
@@ -24,6 +34,18 @@ const RivalsModule = {
                 const overlay = document.getElementById('player-card-overlay');
                 overlay.style.display = 'none';
                 overlay.classList.add('hidden');
+            });
+        }
+
+        const myCardBtn = document.getElementById('my-card-nav-btn');
+        if (myCardBtn) {
+            myCardBtn.addEventListener('click', () => {
+                const user = auth.currentUser;
+                if (user) {
+                    window.openPlayerCard(user.uid, user.email);
+                } else {
+                    alert("You must be logged in to view your card.");
+                }
             });
         }
     },
@@ -325,10 +347,33 @@ const RivalsModule = {
                 return rankColors[base] || '#333';
             };
 
+            const tooltip = document.getElementById('muscle-tooltip');
+
             muscles.forEach(m => {
                 const path = clone.querySelector(`[data-id="${m.id}"]`);
                 if (path) {
                     path.style.fill = getColor(m.rank);
+                    
+                    // Add interactivity
+                    path.style.cursor = 'pointer';
+                    path.style.transition = 'filter 0.2s';
+                    
+                    path.addEventListener('mousemove', (e) => {
+                        path.style.filter = 'brightness(1.5)';
+                        if (tooltip) {
+                            tooltip.textContent = `${m.name}: ${m.rank}`;
+                            tooltip.classList.remove('hidden');
+                            tooltip.style.left = e.pageX + 'px';
+                            tooltip.style.top = e.pageY + 'px';
+                        }
+                    });
+                    
+                    path.addEventListener('mouseleave', () => {
+                        path.style.filter = 'none';
+                        if (tooltip) {
+                            tooltip.classList.add('hidden');
+                        }
+                    });
                 }
             });
 
