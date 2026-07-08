@@ -3073,6 +3073,12 @@ document.addEventListener('DOMContentLoaded', () => {
 FirebaseModule.checkSession().then(isLoggedIn => {
     if (isLoggedIn) {
         document.getElementById('auth-overlay').style.display = 'none';
+        
+        // Ensure "My Card" triggers immediately on refresh once Auth is ready
+        const lastView = Storage.get('mr_last_view', 'muscle-rankings');
+        if (lastView === 'my-card' && FirebaseModule.currentUser) {
+            RivalsModule.viewPlayerCard(FirebaseModule.currentUser.uid, FirebaseModule.currentUser.email);
+        }
     }
 });
 

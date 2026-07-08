@@ -289,7 +289,7 @@ const RivalsModule = {
                     mr_muscles: localStorage.getItem('mr_muscles')
                 };
                 profileData = {
-                    mr_pokemon: localStorage.getItem('mr_pokemon')
+                    mr_pokemon: localStorage.getItem('mr_pokemon_showcase')
                 };
             } else {
                 const [doc, profileDoc] = await Promise.all([
