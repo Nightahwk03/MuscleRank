@@ -759,7 +759,6 @@ document.addEventListener('DOMContentLoaded', () => {
     navBtns.forEach(btn => {
         btn.addEventListener('click', () => {
             const target = btn.dataset.target;
-            if (target === 'my-card') return;
             Storage.set('mr_last_view', target);
             
             navBtns.forEach(b => b.classList.remove('active'));
@@ -788,6 +787,11 @@ document.addEventListener('DOMContentLoaded', () => {
             if (target === 'pull-log') renderPullLog();
             if (target === 'pokeweight') renderPokeweight();
             if (target === 'analytics') renderAnalytics();
+            if (target === 'my-card') {
+                if (FirebaseModule.currentUser) {
+                    RivalsModule.viewPlayerCard(FirebaseModule.currentUser.uid, FirebaseModule.currentUser.email);
+                }
+            }
             // Close mobile menu on click
             const sidebar = document.getElementById('sidebar');
             if (sidebar && window.innerWidth <= 768) {
@@ -3318,13 +3322,6 @@ if (toggleResetConfirmBtn && resetConfirmInput) {
             const showcaseModal = document.getElementById('showcase-replace-modal');
             if (showcaseModal && !showcaseModal.classList.contains('hidden')) {
                 const closeBtn = document.getElementById('close-showcase-replace-btn');
-                if (closeBtn) closeBtn.click();
-                return;
-            }
-
-            const playerCardModal = document.getElementById('player-card-overlay');
-            if (playerCardModal && !playerCardModal.classList.contains('hidden') && playerCardModal.style.display !== 'none') {
-                const closeBtn = document.getElementById('player-card-close');
                 if (closeBtn) closeBtn.click();
                 return;
             }

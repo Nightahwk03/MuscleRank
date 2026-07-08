@@ -31,23 +31,12 @@ const RivalsModule = {
         const closeCard = document.getElementById('player-card-close');
         if (closeCard) {
             closeCard.addEventListener('click', () => {
-                const overlay = document.getElementById('player-card-overlay');
-                overlay.style.display = 'none';
-                overlay.classList.add('hidden');
+                document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
+                document.getElementById('rivals').classList.remove('hidden');
             });
         }
 
-        const myCardBtn = document.getElementById('my-card-nav-btn');
-        if (myCardBtn) {
-            myCardBtn.addEventListener('click', () => {
-                const user = FirebaseModule.currentUser;
-                if (user) {
-                    RivalsModule.viewPlayerCard(user.uid, user.email);
-                } else {
-                    alert("You must be logged in to view your card.");
-                }
-            });
-        }
+        // myCardBtn listener moved to main.js
     },
 
     async ensureProfile() {
@@ -264,12 +253,22 @@ const RivalsModule = {
 
     async viewPlayerCard(friendId, friendEmail) {
         document.getElementById('player-card-name').textContent = friendEmail;
-        const overlay = document.getElementById('player-card-overlay');
-        overlay.classList.remove('hidden');
-        overlay.style.display = 'flex';
         
         // Define isMe
         const isMe = (FirebaseModule.currentUser && FirebaseModule.currentUser.uid === friendId);
+
+        // Switch view
+        document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
+        document.getElementById('my-card').classList.remove('hidden');
+        
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        if (isMe) {
+            const myCardBtn = document.querySelector('[data-target="my-card"]');
+            if (myCardBtn) myCardBtn.classList.add('active');
+            document.getElementById('player-card-close').style.display = 'none';
+        } else {
+            document.getElementById('player-card-close').style.display = 'flex';
+        }
 
         // Reset fields
         document.getElementById('player-card-bw').textContent = 'Loading...';
