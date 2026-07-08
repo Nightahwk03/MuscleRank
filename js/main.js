@@ -1419,7 +1419,11 @@ document.addEventListener('DOMContentLoaded', () => {
             // Reset Bodyweight History
             Storage.set('mr_bodyweight_history', []);
             
-            // Re-initialize Settings to update the current weight variable if needed
+            // Reset Dashboard Data (Streak Multiplier)
+            const currentSettings = SettingsModule.getSettings();
+            currentSettings.streakMultiplier = 1.0;
+            currentSettings.lastStreakEval = null;
+            Storage.set('mr_settings', currentSettings);
             SettingsModule.init();
 
             // Reset Muscles (Ranks & XP)
@@ -1500,10 +1504,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const improvementText = bottom3.length > 0 ? bottom3.map(m => `${m.name} (${m.rank})`).join('<br>') : 'N/A';
         
         const cardsData = [
-            { title: 'Perfect Weeks', value: perfectWeeks, color: '#B026FF', bg: 'linear-gradient(135deg, rgba(176, 38, 255, 0.1), rgba(0, 0, 0, 0.4))' },
+            { title: 'Perfect Weeks', value: perfectWeeks, color: '#00FF00', bg: 'linear-gradient(135deg, rgba(0, 255, 0, 0.1), rgba(0, 0, 0, 0.4))' },
             { title: 'Streak Multiplier', value: streakMultiplier, color: '#9B30FF', bg: 'linear-gradient(135deg, rgba(155, 48, 255, 0.1), rgba(0, 0, 0, 0.4))' },
-            { title: 'Highest Rank', value: highestRankText, color: '#DA70D6', bg: 'linear-gradient(135deg, rgba(218, 112, 214, 0.1), rgba(0, 0, 0, 0.4))' },
-            { title: 'Area of Improvement', value: improvementText, color: '#8A2BE2', bg: 'linear-gradient(135deg, rgba(138, 43, 226, 0.1), rgba(0, 0, 0, 0.4))' }
+            { title: 'Highest Rank', value: highestRankText, color: '#00FF00', bg: 'linear-gradient(135deg, rgba(0, 255, 0, 0.1), rgba(0, 0, 0, 0.4))' },
+            { title: 'Area of Improvement', value: improvementText, color: '#9B30FF', bg: 'linear-gradient(135deg, rgba(155, 48, 255, 0.1), rgba(0, 0, 0, 0.4))' }
         ];
         
         cardsData.forEach(c => {
