@@ -3343,5 +3343,3 @@ if (toggleResetConfirmBtn && resetConfirmInput) {
         }
     });
 
-});
-
