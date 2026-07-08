@@ -271,6 +271,11 @@ const RivalsModule = {
         // Reset fields
         document.getElementById('player-card-bw').textContent = 'Loading...';
         document.getElementById('player-card-last-workout').textContent = 'Loading...';
+        document.getElementById('player-card-top-lifts').innerHTML = '';
+        document.getElementById('player-card-showcase').innerHTML = '';
+        document.getElementById('player-card-bodygraph').innerHTML = '';
+
+        try {
             const [doc, profileDoc] = await Promise.all([
                 db.collection('user_data').doc(friendId).get(),
                 db.collection('user_profiles').doc(friendId).get()
@@ -323,12 +328,6 @@ const RivalsModule = {
             if (data.mr_workout_log) {
                 const log = JSON.parse(data.mr_workout_log);
                 this.calculateRivalTopLifts(log);
-            }
-
-            // Pinned Cards
-            if (data.mr_pokemon) {
-                const collection = JSON.parse(data.mr_pokemon);
-                this.renderRivalShowcase(collection);
             }
 
         } catch (error) {
