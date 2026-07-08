@@ -594,7 +594,7 @@ const RivalsModule = {
             // Full screen view on click
             cardWrap.style.cursor = 'pointer';
             cardWrap.onclick = () => {
-                if(window.openLightbox) window.openLightbox(url);
+                if(window.openLightbox) window.openLightbox(urls, index);
             };
 
             cardWrap.appendChild(img);
@@ -605,39 +605,6 @@ const RivalsModule = {
             itemContainer.style.alignItems = 'center';
             itemContainer.style.gap = '10px';
             itemContainer.appendChild(cardWrap);
-
-            if (isMe) {
-                itemContainer.draggable = true;
-                itemContainer.style.cursor = 'grab';
-                
-                itemContainer.addEventListener('dragstart', (e) => {
-                    e.dataTransfer.setData('text/plain', index);
-                    itemContainer.style.opacity = '0.5';
-                });
-                
-                itemContainer.addEventListener('dragend', () => {
-                    itemContainer.style.opacity = '1';
-                });
-                
-                itemContainer.addEventListener('dragover', (e) => {
-                    e.preventDefault(); // Necessary to allow dropping
-                    itemContainer.style.transform = 'scale(1.05)';
-                });
-                
-                itemContainer.addEventListener('dragleave', () => {
-                    itemContainer.style.transform = 'scale(1)';
-                });
-                
-                itemContainer.addEventListener('drop', (e) => {
-                    e.preventDefault();
-                    itemContainer.style.transform = 'scale(1)';
-                    const draggedIndex = parseInt(e.dataTransfer.getData('text/plain'));
-                    if (draggedIndex !== index && !isNaN(draggedIndex)) {
-                        ShowcaseModule.swapCards(draggedIndex, index);
-                        RivalsModule.renderRivalShowcase(ShowcaseModule.getShowcase(), true);
-                    }
-                });
-            }
 
             container.appendChild(itemContainer);
         });
