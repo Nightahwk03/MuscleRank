@@ -316,11 +316,32 @@ const RivalsModule = {
                 this.renderRivalShowcase(showcaseUrls, isMe);
             }
 
+            let rivalUnit = 'kg';
+            if (data.mr_settings) {
+                try {
+                    const settings = JSON.parse(data.mr_settings);
+                    rivalUnit = settings.unit || 'kg';
+                } catch(e) {}
+            }
+            
+            let localUnit = 'kg';
+            if (typeof SettingsModule !== 'undefined') {
+                localUnit = SettingsModule.getSettings().unit || 'kg';
+            }
+            
+            const convertWeight = (w) => {
+                let val = parseFloat(w);
+                if (rivalUnit === 'lbs' && localUnit === 'kg') val = val * 0.453592;
+                else if (rivalUnit === 'kg' && localUnit === 'lbs') val = val * 2.20462;
+                return Math.round(val * 10) / 10;
+            };
+
             // Extract Bodyweight
             if (data.mr_bodyweight_history) {
                 const bwHist = JSON.parse(data.mr_bodyweight_history);
                 if (bwHist.length > 0) {
-                    document.getElementById('player-card-bw').textContent = bwHist[bwHist.length - 1].weight + ' kg';
+                    const convBw = convertWeight(bwHist[bwHist.length - 1].weight);
+                    document.getElementById('player-card-bw').textContent = convBw + ' ' + localUnit;
                 }
             }
 
@@ -365,7 +386,7 @@ const RivalsModule = {
             // Top Lifts
             if (data.mr_history) {
                 const log = JSON.parse(data.mr_history);
-                this.calculateRivalTopLifts(log);
+                this.calculateRivalTopLifts(log, localUnit, convertWeight);
             }
 
         } catch (error) {
@@ -507,7 +528,7 @@ const RivalsModule = {
         }
     },
 
-    calculateRivalTopLifts(logs) {
+    calculateRivalTopLifts(logs, localUnit = 'kg', convertWeight = (w) => w) {
         const bestLifts = {};
         logs.forEach(session => {
             if (!session.exercises) return;
@@ -521,8 +542,9 @@ const RivalsModule = {
                 if (!ex.sets) return;
                 ex.sets.forEach(set => {
                     if (set.reps > 0 && set.weight > 0) {
-                        if (!bestLifts[ex.id] || bestLifts[ex.id].weight < set.weight) {
-                            bestLifts[ex.id] = { weight: set.weight, reps: set.reps, name: ex.name || ex.id };
+                        const convWeight = convertWeight(set.weight);
+                        if (!bestLifts[ex.id] || bestLifts[ex.id].weight < convWeight) {
+                            bestLifts[ex.id] = { weight: convWeight, reps: set.reps, name: ex.name || ex.id };
                         }
                     }
                 });
@@ -543,7 +565,7 @@ const RivalsModule = {
             div.style.cssText = 'background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid ' + (idx === 0 ? 'gold' : idx === 1 ? 'silver' : '#CD7F32');
             div.innerHTML = `
                 <div style="font-weight: bold; font-size: 1.2rem;">${lift.name}</div>
-                <div style="color: var(--neon-primary); font-weight: bold; font-size: 1.3rem;">${lift.weight}kg <span style="color: var(--text-secondary); font-weight: normal; font-size: 1rem;">x ${lift.reps}</span></div>
+                <div style="color: var(--neon-primary); font-weight: bold; font-size: 1.3rem;">${lift.weight}${localUnit} <span style="color: var(--text-secondary); font-weight: normal; font-size: 1rem;">x ${lift.reps}</span></div>
             `;
             container.appendChild(div);
         });
