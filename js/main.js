@@ -70,7 +70,9 @@ const INITIAL_EXERCISES = [
   { id: 'hip_thrusts', name: 'Hip Thrusts', type: 'compound', hasWarmup: false, isBodyweight: false, muscleContributions: { glutes: 1.0, quads: 0.3, hamstrings: 0.3, calves: 0.3, core: 0.3, lower_back: 0.3 } },
   { id: 'ab_crunches', name: 'Ab Crunches', type: 'isolation', hasWarmup: false, isBodyweight: false, muscleContributions: { core: 1.0 } },
   { id: 'hanging_leg_raises', name: "Hanging Leg Raises", type: 'isolation', hasWarmup: false, isBodyweight: true, muscleContributions: { core: 1.0 } },
-  { id: 'skull_crushers', name: 'Skull Crushers', type: 'isolation', hasWarmup: false, isBodyweight: false, muscleContributions: { triceps: 1.0 } }
+  { id: 'skull_crushers', name: 'Skull Crushers', type: 'isolation', hasWarmup: false, isBodyweight: false, muscleContributions: { triceps: 1.0 } },
+  { id: 'shrugs', name: 'Shrugs', type: 'isolation', hasWarmup: false, isBodyweight: false, muscleContributions: { traps: 1.0 } },
+  { id: 'hammer_curls', name: 'Hammer Curls', type: 'isolation', hasWarmup: false, isBodyweight: false, muscleContributions: { forearms: 1.0, biceps: 0.3 } }
 ];
 
 const MAJOR_RANKS = [
