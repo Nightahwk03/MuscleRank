@@ -316,23 +316,26 @@ const RivalsModule = {
                 this.renderRivalShowcase(showcaseUrls, isMe);
             }
 
-            let rivalUnit = 'kg';
+            let rivalUnit = 'kgs';
             if (data.mr_settings) {
                 try {
                     const settings = JSON.parse(data.mr_settings);
-                    rivalUnit = settings.unit || 'kg';
+                    rivalUnit = settings.unit || 'kgs';
                 } catch(e) {}
             }
             
-            let localUnit = 'kg';
+            let localUnit = 'kgs';
             if (typeof SettingsModule !== 'undefined') {
-                localUnit = SettingsModule.getSettings().unit || 'kg';
+                localUnit = SettingsModule.getSettings().unit || 'kgs';
             }
             
             const convertWeight = (w) => {
                 let val = parseFloat(w);
-                if (rivalUnit === 'lbs' && localUnit === 'kg') val = val * 0.453592;
-                else if (rivalUnit === 'kg' && localUnit === 'lbs') val = val * 2.20462;
+                const rU = rivalUnit.toLowerCase().replace('kgs', 'kg');
+                const lU = localUnit.toLowerCase().replace('kgs', 'kg');
+                
+                if (rU === 'lbs' && lU === 'kg') val = val * 0.453592;
+                else if (rU === 'kg' && lU === 'lbs') val = val * 2.20462;
                 return Math.round(val * 10) / 10;
             };
 
