@@ -1631,14 +1631,14 @@ document.addEventListener('DOMContentLoaded', () => {
             const mapping = {
                 'Unranked': { solid: '#FFFFFF', gradient: '#FFFFFF' },
                 'Wood': { solid: '#D2B48C', gradient: 'linear-gradient(135deg, #D2B48C, #A0522D)' },
-                'Bronze': { solid: '#CD7F32', gradient: 'linear-gradient(135deg, #8B4513, #FFA500)' },
-                'Silver': { solid: '#C0C0C0', gradient: 'linear-gradient(135deg, #D3D3D3, #FFFFFF)' },
-                'Gold': { solid: '#FFD700', gradient: 'linear-gradient(135deg, #FFD700, #DAA520)' },
-                'Diamond': { solid: '#9B30FF', gradient: 'linear-gradient(135deg, #8A2BE2, #FFFFFF)' },
-                'Platinum': { solid: '#E5E4E2', gradient: 'linear-gradient(135deg, #FFC0CB, #FFFFFF, #A9A9A9)' },
-                'Obsidian': { solid: '#4B0082', gradient: 'linear-gradient(135deg, #000000, #4B0082)' },
-                'Titanium': { solid: '#E6E6FA', gradient: 'linear-gradient(135deg, #808080, #C0C0C0, #FFFFFF)' },
-                'Demon': { solid: '#FF4500', gradient: 'linear-gradient(135deg, #FF0000, #FF4500, #FFFF00)' }
+                'Bronze': { solid: '#B87333', gradient: 'linear-gradient(135deg, #E68A5C, #B87333, #8A3324)' },
+                'Silver': { solid: '#E0E0E0', gradient: 'linear-gradient(135deg, #FFFFFF, #BDBDBD, #757575)' },
+                'Gold': { solid: '#FFD700', gradient: 'linear-gradient(135deg, #FFE066, #FFD700, #CC9900)' },
+                'Diamond': { solid: '#D8BFD8', gradient: 'linear-gradient(135deg, #FFFFFF, #D8BFD8, #9370DB)' },
+                'Platinum': { solid: '#E5E4E2', gradient: 'linear-gradient(135deg, #FFFFFF, #A9A9A9, #2F4F4F)' },
+                'Obsidian': { solid: '#2A0845', gradient: 'linear-gradient(135deg, #4A0E4E, #11001C, #4B0010)' },
+                'Titanium': { solid: '#8A8679', gradient: 'linear-gradient(135deg, #E5E4E2, #FFD700, #11001C)' },
+                'Demon': { solid: '#FF2400', gradient: 'linear-gradient(135deg, #FF4500, #FF0000, #FFD700, #8B4513)' }
             };
             const baseVisuals = mapping[baseRank] || mapping['Unranked'];
             
