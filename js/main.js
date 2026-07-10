@@ -412,9 +412,11 @@ const RankingModule = {
                 }
             });
             
-            // Self-healing: if bodyweight wasn't set previously, xp might be NaN. Recalculate!
+            // Self-healing & Recalculation
             let hasCorruption = stored.some(m => isNaN(m.xp) || m.xp === null);
-            if (hasCorruption) {
+            let needsRecalc = !Storage.get('mr_recalc_v2', false);
+            
+            if (hasCorruption || needsRecalc) {
                 stored.forEach(m => { m.xp = 0; m.rank = RANKS[0].name; });
                 const history = HistoryModule.getAllHistory();
                 history.forEach(workout => {
@@ -426,7 +428,8 @@ const RankingModule = {
                         if(!dbEx) return;
                         let maxW = 0, maxR = 0;
                         exRef.sets.forEach(set => {
-                            if(set.completed && set.weight >= maxW) {
+                            // History objects do not store 'completed' status, they are inherently completed
+                            if(set.weight >= maxW) {
                                 if(set.weight > maxW) { maxW = set.weight; maxR = set.reps; }
                                 else if (set.weight === maxW && set.reps > maxR) maxR = set.reps;
                             }
@@ -436,7 +439,7 @@ const RankingModule = {
                         if(xp > 0) {
                             const maxC = Math.max(...Object.values(dbEx.muscleContributions));
                             Object.entries(dbEx.muscleContributions).forEach(([mId, perc]) => {
-                                const xpGain = Math.floor(xp * ((perc === maxC) ? perc : 0.3));
+                                const xpGain = Math.floor(xp * ((perc === maxC) ? perc : 0.25)); // Fix secondary to 0.25
                                 const musc = stored.find(m => m.id === mId);
                                 if(musc) musc.xp += xpGain;
                             });
@@ -445,6 +448,7 @@ const RankingModule = {
                 });
                 // Assign ranks after full recovery
                 stored.forEach(m => { m.rank = this.getRankForXP(m.xp).name; });
+                Storage.set('mr_recalc_v2', true);
             }
             
             this.muscles = stored;
