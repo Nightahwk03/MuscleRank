@@ -98,6 +98,17 @@ MAJOR_RANKS.forEach(rank => {
             colorClass: rank.colorClass
         });
     }
+    if (rank.name === 'Demon') {
+        let currentThreshold = rank.end;
+        for (let i = 6; i <= 20; i++) {
+            RANKS.push({
+                name: `Demon ${i}`,
+                threshold: currentThreshold,
+                colorClass: rank.colorClass
+            });
+            currentThreshold += 100000;
+        }
+    }
 });
 
 // --- storage.js ---
@@ -1645,15 +1656,19 @@ document.addEventListener('DOMContentLoaded', () => {
             if (baseRank === 'Unranked' || !tierStr) return baseVisuals;
             
             const tier = parseInt(tierStr);
-            // Adjust color based on tier (1-5)
-            // Tier 3 is base color (0% change). Tier 1 is lighter (+40%), Tier 5 is darker (-40%)
-            const percent = (3 - tier) * 0.20;
+            // Adjust color based on tier
+            let percent = (3 - tier) * 0.20;
+            if (tier > 5) {
+                // Tier 5 is -0.40. Step down by 0.04 (4%) for each tier up to 20 to hit -1.0 (solid black)
+                percent = -0.40 - ((tier - 5) * 0.04);
+            }
             if (percent === 0) return baseVisuals;
             
             const shadeHexColor = (color, percent) => {
                 const f = parseInt(color.slice(1), 16),
                       t = percent < 0 ? 0 : 255,
-                      p = percent < 0 ? percent * -1 : percent,
+                      rawP = percent < 0 ? percent * -1 : percent,
+                      p = Math.min(1.0, rawP),
                       R = f >> 16,
                       G = f >> 8 & 0x00FF,
                       B = f & 0x0000FF;
