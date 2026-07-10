@@ -2997,6 +2997,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 `;
                 tbody.appendChild(tr);
             });
+            
+            const searchInput = document.getElementById('pokeweight-search');
+            if (searchInput) {
+                searchInput.addEventListener('input', (e) => {
+                    const query = e.target.value.toLowerCase();
+                    const rows = document.querySelectorAll('#pokeweight-table-body tr');
+                    rows.forEach(row => {
+                        const name = row.children[0].textContent.toLowerCase();
+                        if (name.includes(query)) {
+                            row.style.display = '';
+                        } else {
+                            row.style.display = 'none';
+                        }
+                    });
+                });
+            }
+
             pokeweightDataFetched = true;
         } catch (error) {
             console.error('Error loading pokeweight data:', error);
