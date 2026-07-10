@@ -781,9 +781,14 @@ document.addEventListener('DOMContentLoaded', () => {
     let workoutSeconds = 0;
 
     navBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
+        btn.addEventListener('click', (e) => {
             const target = btn.dataset.target;
             Storage.set('local_last_view', target);
+            
+            // Clear sub-views if it's a real user click (not a page reload trigger)
+            if (e.isTrusted) {
+                Storage.set('mr_sub_view', null);
+            }
             
             navBtns.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
@@ -2699,7 +2704,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const renderPacks = () => {
                 currentOpenedSet = null;
-                Storage.set('local_sub_view', null);
+                Storage.set('mr_sub_view', null);
                 packPullBackBtn.classList.add('hidden');
                 if (packPullRandomBtn) packPullRandomBtn.classList.add('hidden');
                 
