@@ -1667,10 +1667,10 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const tier = parseInt(tierStr);
             // Adjust color based on tier
-            let percent = (3 - tier) * 0.20;
+            let percent = (3 - tier) * 0.15;
             if (tier > 5) {
-                // Tier 5 is -0.40. Step down by 0.04 (4%) for each tier up to 20 to hit -1.0 (solid black)
-                percent = -0.40 - ((tier - 5) * 0.04);
+                // Tier 5 is -0.30. Step down by ~0.033 for each tier up to 20 to smoothly hit ~ -0.80 (very dark, but NOT pitch black)
+                percent = -0.30 - ((tier - 5) * 0.033);
             }
             if (percent === 0) return baseVisuals;
             
