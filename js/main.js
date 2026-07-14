@@ -311,9 +311,14 @@ const StreakEngine = {
         let lastEval = settings.lastStreakEval ? new Date(settings.lastStreakEval) : null;
         
         if (!lastEval) {
-            // First time evaluation, just set timestamp so we evaluate NEXT week
-            SettingsModule.updateStreak(1.0);
-            return;
+            if (history.length > 0) {
+                const oldestDate = new Date(Math.min(...history.map(h => new Date(h.date).getTime())));
+                lastEval = this.getStartOfWeek(oldestDate);
+                settings.streakMultiplier = 1.0;
+            } else {
+                SettingsModule.updateStreak(1.0);
+                return;
+            }
         }
 
         let evalWeekStart = this.getStartOfWeek(lastEval);
@@ -329,15 +334,15 @@ const StreakEngine = {
             evalWeekEnd.setDate(evalWeekEnd.getDate() + 6);
             evalWeekEnd.setHours(23, 59, 59, 999);
             
-            const uniqueDays = new Set();
+            let workoutsThisWeek = 0;
             history.forEach(h => {
                 const hDate = new Date(h.date);
                 if (hDate.getTime() >= evalWeekStart.getTime() && hDate.getTime() <= evalWeekEnd.getTime()) {
-                    uniqueDays.add(hDate.toLocaleDateString());
+                    workoutsThisWeek++;
                 }
             });
             
-            if (uniqueDays.size >= settings.weeklyGoal) {
+            if (workoutsThisWeek >= settings.weeklyGoal) {
                 newMultiplier += 0.1;
             } else {
                 newMultiplier -= 0.1;
@@ -2670,6 +2675,15 @@ document.addEventListener('DOMContentLoaded', () => {
             alert(`Workout Logged Successfully! You earned ${totalWorkoutXP} XP.`);
         }
     });
+
+    // One-time fix to force streak recalculation with new total-workouts logic
+    if (!Storage.get('mr_streak_logic_fixed_v2', false)) {
+        const settings = SettingsModule.getSettings();
+        settings.lastStreakEval = null;
+        settings.streakMultiplier = 1.0;
+        Storage.set('mr_settings', settings);
+        Storage.set('mr_streak_logic_fixed_v2', true);
+    }
 
     StreakEngine.evaluate();
     
